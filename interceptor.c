@@ -279,12 +279,22 @@ void my_exit_group(int status)
  * - Don't forget to call the original system call, so we allow processes to proceed as normal.
  */
 asmlinkage long interceptor(struct pt_regs reg) {
+	int syscall = table[reg.ax];
 
+	if (syscall.monitored == 2){
+		if (check_pid_monitored(reg.ax, current->pid) == 0){
+			log_message(current->pid, reg.ax, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+	} else if (syscall.monitored == 1){
+		if (check_pid_monitored(reg.ax, current->pid) == 1){
+			log_message(current->pid, reg.ax, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
+		} else {
+			printk(KERN_ALERT "PID NOT MONITORED");
+		}
+	} else {
+		printk(KERN_ALERT "PID NOT MONITORED");
+	}
 
-
-
-
-	return 0; // Just a placeholder, so it compiles with no warnings!
+	return table[syscall].f(reg);
 }
 
 /**
