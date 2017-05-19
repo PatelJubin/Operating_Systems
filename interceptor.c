@@ -353,7 +353,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 	switch(cmd) {
 		case REQUEST_SYSCALL_INTERCEPT:
 			// Has the right permissions, must be root.
-			if (current_uid != 0) {
+			if (current_uid() != 0) {
 				return -EPERM;
 			}
 
@@ -363,6 +363,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			}
 
 			// The original system call is saved.
+			//***questionable locks not sure if needed ***
 			spin_lock(&pidlist_lock);
 			table[syscall].f = sys_call_table[syscall];
 			spin_unlock(&pidlist_lock);
@@ -371,17 +372,18 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			// with a generic interceptor function.
 			spin_lock(&calltable_lock);
 			set_addr_rw((unsigned long)sys_call_table);
-			sys_call_table[syscall] = interceptor;
+			sys_call_table[syscall] = &interceptor;
 			set_addr_ro((unsigned long)sys_call_table);
 			spin_unlock(&calltable_lock);
 
+			//***questionable locks not sure if needed ***
 			spin_lock(&pidlist_lock);
 			table[syscall].intercepted = 1;
 			spin_unlock(&pidlist_lock);
 			break;
 		case REQUEST_SYSCALL_RELEASE:
 			// Has the right permissions, must be root.
-			if (current_uid != 0) {
+			if (current_uid() != 0) {
 				return -EPERM;
 			}
 
@@ -392,12 +394,16 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 
 			// The original saved system call is restored in the system call table
 			// in its corresponding position.
+			
+			//****add in destroy_list to clear the syscall's list of monitored PIDs****
+			
 			spin_lock(&calltable_lock);
 			set_addr_rw((unsigned long)sys_call_table);
 			sys_call_table[syscall] = table[syscall].f;
 			set_addr_ro((unsigned long)sys_call_table);
 			spin_unlock(&calltable_lock);
 
+			//***questionable locks not sure if needed ***
 			spin_lock(&pidlist_lock);
 			table[syscall].intercepted = 0;
 			spin_unlock(&pidlist_lock);
