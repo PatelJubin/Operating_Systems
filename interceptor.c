@@ -458,7 +458,7 @@ static int init_function(void) {
 	}
 	spin_unlock(&pidlist_lock);
 
-	return my_syscall;
+	return 0;
 }
 
 /**
@@ -470,15 +470,20 @@ static int init_function(void) {
  * - Make sure to set the system call table to writable when making changes, 
  *   then set it back to read only once done.
  * - Ensure synchronization, if needed.
- */
-static void exit_function(void)
-{        
+ */      
+static void exit_function(void) {       
 
+	int s = 0;
+	for (s = 0; s < NR_syscalls; s++) {
+		destroy_list(sys);
+	}
 
-
-
-
-
+	spin_lock(&calltable_lock);
+	set_addr_rw((unsigned long)sys_call_table);
+	sys_call_table[MY_CUSTOM_SYSCALL] = orig_custom_syscall;
+	sys_call_table[__NR_exit_group] = orig_exit_group;
+	set_addr_ro((unsigned long)sys_call_table);
+	spin_unlock(&calltable_lock);
 }
 
 module_init(init_function);
