@@ -279,9 +279,9 @@ void my_exit_group(int status)
  * - Don't forget to call the original system call, so we allow processes to proceed as normal.
  */
 asmlinkage long interceptor(struct pt_regs reg) {
-	int syscall = table[reg.ax];
+	int syscall = reg.ax;
 
-	if (syscall.monitored == 2 && (check_pid_monitored(reg.ax, current->pid) == 0)) {
+	if (table[syscall].monitored == 2 && (check_pid_monitored(reg.ax, current->pid) == 0)) {
 		// These pid's have their monitored values flipped to show that they are blacklisted.
 		log_message(current->pid, reg.ax, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	} else if (check_pid_monitored(reg.ax, current->pid) == 1){
@@ -291,7 +291,7 @@ asmlinkage long interceptor(struct pt_regs reg) {
 		printk(KERN_ALERT "PID NOT MONITORED");
 	}
 
-	return syscall.f(reg);
+	return table[syscall].f(reg);
 }
 
 /**
@@ -451,9 +451,9 @@ static int init_function(void) {
 	set_addr_ro((unsigned long) sys_call_table);
 	spin_unlock(&calltable_lock);
 
-	int i = 0;
-	spinlock(&pidlist_lock);
-	for(i; i<NR_syscalls;i++){
+	int i;
+	spin_lock(&pidlist_lock);
+	for(i = 0 ; i<NR_syscalls;i++){
 		INIT_LIST_HEAD(&(table[i].my_list));
 	}
 	spin_unlock(&pidlist_lock);
@@ -475,7 +475,7 @@ static void exit_function(void) {
 
 	int s = 0;
 	for (s = 0; s < NR_syscalls; s++) {
-		destroy_list(sys);
+		destroy_list(s);
 	}
 
 	spin_lock(&calltable_lock);
