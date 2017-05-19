@@ -397,6 +397,8 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			
 			//****add in destroy_list to clear the syscall's list of monitored PIDs****
 			
+			destroy_list(syscall);
+
 			spin_lock(&calltable_lock);
 			set_addr_rw((unsigned long)sys_call_table);
 			sys_call_table[syscall] = table[syscall].f;
@@ -409,12 +411,27 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			spin_unlock(&pidlist_lock);
 			return 0;
 		case REQUEST_START_MONITORING:
+			//If invalid pid
+			if (pid < 0){
+				return -EINVAL;
+			if (current_uid() != 0) {
+				return -EPERM;
+
+			// Already monitored or non-valid pid
+			if ((pid_task(find_vpid(pid), PIDTYPE_PID) != NULL) || (check_pid_monitored(syscall, current->pid) == 1)){
+				return -EINVAL;
+			}
+			if (table[syscall].monitored == 2 && (check_pid_monitored(syscall, current->pid) == 0)){
+				return -EINVAL;
+			}
+			if (table[syscall].intercepted == 1) {
+				return -EBUSY;
+			}
 			break;
 		case REQUEST_STOP_MONITORING:
 			break;
 		default:
-			printk("Invalid command");
-			break;
+			return -EINVAL;
 	}
 	return -EINVAL;
 }
@@ -473,17 +490,19 @@ static int init_function(void) {
  */      
 static void exit_function(void) {       
 
-	int s = 0;
-	for (s = 0; s < NR_syscalls; s++) {
-		destroy_list(s);
-	}
-
 	spin_lock(&calltable_lock);
 	set_addr_rw((unsigned long)sys_call_table);
 	sys_call_table[MY_CUSTOM_SYSCALL] = orig_custom_syscall;
 	sys_call_table[__NR_exit_group] = orig_exit_group;
 	set_addr_ro((unsigned long)sys_call_table);
 	spin_unlock(&calltable_lock);
+
+	int s = 0;
+	spin_lock(&pidlist_lock);
+	for (s = 0; s < NR_syscalls; s++) {
+		destroy_list(s);
+	}
+	spin_unlock(&pidlist_lock);
 }
 
 module_init(init_function);
