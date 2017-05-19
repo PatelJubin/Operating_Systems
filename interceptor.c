@@ -380,7 +380,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			spin_lock(&pidlist_lock);
 			table[syscall].intercepted = 1;
 			spin_unlock(&pidlist_lock);
-			break;
+			return 0;
 		case REQUEST_SYSCALL_RELEASE:
 			// Has the right permissions, must be root.
 			if (current_uid() != 0) {
@@ -407,7 +407,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			spin_lock(&pidlist_lock);
 			table[syscall].intercepted = 0;
 			spin_unlock(&pidlist_lock);
-			break;
+			return 0;
 		case REQUEST_START_MONITORING:
 			break;
 		case REQUEST_STOP_MONITORING:
