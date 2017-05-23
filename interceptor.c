@@ -459,7 +459,6 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 					}
 					table[syscall].monitored = 1;
 					spin_unlock(&pidlist_lock);
-					}
 				// Blacklist implementation flips the flags
 				} else {
 					spin_lock(&pidlist_lock);
@@ -518,7 +517,6 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 					}
 					table[syscall].monitored = 0;
 					spin_unlock(&pidlist_lock);
-					}
 				// Blacklist implementation flips the flags
 				} else {
 					spin_lock(&pidlist_lock);
