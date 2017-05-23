@@ -413,26 +413,34 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 		case REQUEST_START_MONITORING:
 			//If invalid pid
 			if (pid < 0){
+				printk(KERN_ALERT "We are here 1");
 				return -EINVAL;
 			}
 
 			// Already monitored
 			if (check_pid_monitored(syscall, pid) == 1){
+				printk(KERN_ALERT "We are here 2");
+
 				return -EBUSY;
 			}
 			
 			// Already monitored or non-valid pid
 			if ((pid_task(find_vpid(pid), PIDTYPE_PID) != NULL) || (check_pid_monitored(syscall, current->pid) == 1)){
+								printk(KERN_ALERT "We are here 3");
+
 				return -EINVAL;
 			}
 
 			// Blacklist already monitored
 			if (table[syscall].monitored == 2 && (check_pid_monitored(syscall, current->pid) == 0)){
+								printk(KERN_ALERT "We are here 4");
+
 				return -EINVAL;
 			}
 
 			// Already being intercepted
 			if (table[syscall].intercepted == 1) {
+				printk(KERN_ALERT "We are here 5");
 				return -EBUSY;
 			}
 
