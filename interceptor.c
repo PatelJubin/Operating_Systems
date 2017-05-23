@@ -468,6 +468,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 					}
 					spin_unlock(&pidlist_lock);
 				}
+			}
 			return 0;
 		case REQUEST_STOP_MONITORING:
 			//If invalid pid
@@ -526,7 +527,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 					}
 					spin_unlock(&pidlist_lock);
 				}
-
+			}
 			return 0;
 		default:
 			return -EINVAL;
