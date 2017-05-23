@@ -450,6 +450,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				spin_lock(&pidlist_lock);
 				destroy_list(syscall);
 				table[syscall].monitored = 2;
+
 				spin_unlock(&pidlist_lock);
 
 			} else {
@@ -492,11 +493,6 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			if (check_pid_monitored(syscall, pid) == 0){
 				return -EBUSY;
 			}
-			
-			// Not monitored or non-valid pid
-			if ((pid_task(find_vpid(pid), PIDTYPE_PID) != NULL) || (check_pid_monitored(syscall, current->pid) == 0)){
-				return -EINVAL;
-			}
 
 			// Blacklist not monitored
 			if (table[syscall].monitored == 2 && (check_pid_monitored(syscall, current->pid) == 1)){
@@ -513,6 +509,10 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				spin_unlock(&pidlist_lock);
 
 			} else {
+				if (pid_task(find_vpid(pid), PIDTYPE_PID) != NULL){
+					printk(KERN_ALERT "We are here 3");
+					return -EINVAL;
+				}
 				// If its not root or pid not owned by parent process, return EPERM
 				if (current_uid() != 0 || check_pid_from_list(current->pid, pid) != 0){
 					return -EPERM;
