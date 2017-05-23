@@ -425,7 +425,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			}
 			
 			// Already monitored or non-valid pid
-			if ((pid_task(find_vpid(pid), PIDTYPE_PID) != NULL) || (check_pid_monitored(syscall, current->pid) == 1)){
+			if (pid_task(find_vpid(pid), PIDTYPE_PID) != NULL){
 								printk(KERN_ALERT "We are here 3");
 
 				return -EINVAL;
@@ -437,12 +437,13 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 
 				return -EINVAL;
 			}
-
+			/*
 			// Already being intercepted
 			if (table[syscall].intercepted == 1) {
 				printk(KERN_ALERT "We are here 5");
 				return -EBUSY;
 			}
+			*/
 
 			if (pid == 0){
 				printk("We are here");
@@ -502,10 +503,6 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				return -EINVAL;
 			}
 
-			// Already being intercepted
-			if (table[syscall].intercepted == 1) {
-				return -EBUSY;
-			}
 			if (pid == 0){
 				if (current_uid() != 0) {
 					return -EPERM;
