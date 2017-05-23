@@ -482,8 +482,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			}
 
 			// Not monitored for whitelist
-			if (check_pid_monitored(syscall, pid) == 0){
-				if (table[syscall].monitored != 2){
+			if (check_pid_monitored(syscall, pid) == 0 && table[syscall].monitored == 1){
 					printk(KERN_ALERT "We are here 6");
 					return -EBUSY;
 				}
