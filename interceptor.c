@@ -413,24 +413,17 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 		case REQUEST_START_MONITORING:
 			//If invalid pid
 			if (pid < 0){
-				printk(KERN_ALERT "We are here 1");
 				return -EINVAL;
 			}
 
 			// Already monitored
 			if (check_pid_monitored(syscall, pid) == 1){
-				printk(KERN_ALERT "We are here 2");
 				return -EBUSY;
 			}
 			
 
 			// Blacklist already monitored
 			if (table[syscall].monitored == 2 && check_pid_monitored(syscall, pid) == 0){
-				printk(KERN_ALERT "table: %d", table[syscall].monitored);
-				printk(KERN_ALERT "table");
-				printk(KERN_ALERT "pid: %d", check_pid_monitored(syscall, pid));
-				printk(KERN_ALERT "pid");
-				printk(KERN_ALERT "We are here 4");
 				return -EINVAL;
 			}
 			/*
@@ -442,9 +435,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			*/
 
 			if (pid == 0){
-				printk("We are here");
 				if (current_uid() != 0) {
-					printk("Shouldnt be here");
 					return -EPERM;
 				}
 				spin_lock(&pidlist_lock);
@@ -454,7 +445,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				spin_unlock(&pidlist_lock);
 
 			} else {
-				if (pid_task(find_vpid(pid), PIDTYPE_PID) != NULL){
+				if (pid_task(find_vpid(pid), PIDTYPE_PID) != NULL || check_pid_monitored(syscall, pid) == 0){
 					printk(KERN_ALERT "We are here 3");
 					return -EINVAL;
 				}
@@ -514,7 +505,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				spin_unlock(&pidlist_lock);
 
 			} else {
-				if (pid_task(find_vpid(pid), PIDTYPE_PID) != NULL){
+				if (pid_task(find_vpid(pid), PIDTYPE_PID) != NULL || check_pid_monitored(syscall, pid) == 0){
 					printk(KERN_ALERT "We are here 8");
 					return -EINVAL;
 				}
