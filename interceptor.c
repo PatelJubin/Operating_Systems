@@ -414,22 +414,122 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			//If invalid pid
 			if (pid < 0){
 				return -EINVAL;
-			if (current_uid() != 0) {
-				return -EPERM;
+			}
 
+			// Already monitored
+			if (check_pid_monitored(syscall, pid) == 1){
+				return -EBUSY;
+			}
+			
 			// Already monitored or non-valid pid
 			if ((pid_task(find_vpid(pid), PIDTYPE_PID) != NULL) || (check_pid_monitored(syscall, current->pid) == 1)){
 				return -EINVAL;
 			}
+
+			// Blacklist already monitored
 			if (table[syscall].monitored == 2 && (check_pid_monitored(syscall, current->pid) == 0)){
 				return -EINVAL;
 			}
+
+			// Already being intercepted
 			if (table[syscall].intercepted == 1) {
 				return -EBUSY;
 			}
-			break;
+
+			if (pid == 0){
+				if (current_uid() != 0) {
+					return -EPERM;
+				}
+				spin_lock(&pidlist_lock);
+				destroy_list(syscall);
+				table[syscall].monitored = 2;
+				spin_unlock(&pidlist_lock);
+
+			} else {
+				// If its not root or pid not owned by parent process, return EPERM
+				if (current_uid() != 0 || check_pid_from_list(current->pid, pid) != 0){
+					return -EPERM;
+				}
+				// Normal implementation
+				if (table[syscall].monitored != 2){
+					spin_lock(&pidlist_lock);
+					if (add_pid_sysc(pid,syscall) == -ENOMEM){
+						spin_unlock(&pidlist_lock);
+						return -ENOMEM;
+					}
+					table[syscall].monitored = 1;
+					spin_unlock(&pidlist_lock);
+					}
+				// Blacklist implementation flips the flags
+				} else {
+					spin_lock(&pidlist_lock);
+					if(del_pid_sysc(pid, syscall) == -EINVAL){
+						spin_unlock(&pidlist_lock);
+						return -EINVAL;
+					}
+					spin_unlock(&pidlist_lock);
+				}
+			return 0;
 		case REQUEST_STOP_MONITORING:
-			break;
+			//If invalid pid
+			if (pid < 0){
+				return -EINVAL;
+			}
+
+			// Not monitored
+			if (check_pid_monitored(syscall, pid) == 0){
+				return -EBUSY;
+			}
+			
+			// Not monitored or non-valid pid
+			if ((pid_task(find_vpid(pid), PIDTYPE_PID) != NULL) || (check_pid_monitored(syscall, current->pid) == 0)){
+				return -EINVAL;
+			}
+
+			// Blacklist not monitored
+			if (table[syscall].monitored == 2 && (check_pid_monitored(syscall, current->pid) == 1)){
+				return -EINVAL;
+			}
+
+			// Already being intercepted
+			if (table[syscall].intercepted == 1) {
+				return -EBUSY;
+			}
+			if (pid == 0){
+				if (current_uid() != 0) {
+					return -EPERM;
+				}
+				spin_lock(&pidlist_lock);
+				destroy_list(syscall);
+				table[syscall].monitored = 0;
+				spin_unlock(&pidlist_lock);
+
+			} else {
+				// If its not root or pid not owned by parent process, return EPERM
+				if (current_uid() != 0 || check_pid_from_list(current->pid, pid) != 0){
+					return -EPERM;
+				}
+				// Normal implementation
+				if (table[syscall].monitored != 2){
+					spin_lock(&pidlist_lock);
+					if (del_pid_sysc(pid,syscall) == -ENOMEM){
+						spin_unlock(&pidlist_lock);
+						return -ENOMEM;
+					}
+					table[syscall].monitored = 0;
+					spin_unlock(&pidlist_lock);
+					}
+				// Blacklist implementation flips the flags
+				} else {
+					spin_lock(&pidlist_lock);
+					if(add_pid_sysc(pid, syscall) == -EINVAL){
+						spin_unlock(&pidlist_lock);
+						return -EINVAL;
+					}
+					spin_unlock(&pidlist_lock);
+				}
+
+			return 0;
 		default:
 			return -EINVAL;
 	}
