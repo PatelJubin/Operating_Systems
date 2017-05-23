@@ -426,6 +426,10 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 
 			// Blacklist already monitored
 			if (table[syscall].monitored == 2 && check_pid_monitored(syscall, pid) == 0){
+				printk(KERN_ALERT table[syscall].monitored);
+				printk(KERN_ALERT "table");
+				printk(KERN_ALERT check_pid_monitored(syscall, pid));
+				printk(KERN_ALERT "pid");
 				printk(KERN_ALERT "We are here 4");
 				return -EINVAL;
 			}
