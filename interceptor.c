@@ -490,14 +490,16 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				return -EINVAL;
 			}
 
-			// Not monitored
+			// Not monitored for whitelist
 			if (check_pid_monitored(syscall, pid) == 0){
-				printk(KERN_ALERT "We are here 6");
-				return -EBUSY;
+				if (table[syscall].monitored != 2){
+					printk(KERN_ALERT "We are here 6");
+					return -EBUSY;
+				}
 			}
 
 			// Blacklist not monitored
-			if (table[syscall].monitored == 2 && (check_pid_monitored(syscall, current->pid) == 1)){
+			if (table[syscall].monitored == 2 && (check_pid_monitored(syscall, pid) == 1)){
 				printk(KERN_ALERT "We are here 7");
 				return -EINVAL;
 			}
