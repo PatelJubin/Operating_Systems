@@ -256,7 +256,6 @@ void my_exit_group(int status)
 	spin_unlock(&pidlist_lock);
 	orig_exit_group(status);
 
-
 }
 //----------------------------------------------------------------
 
@@ -281,16 +280,15 @@ void my_exit_group(int status)
 asmlinkage long interceptor(struct pt_regs reg) {
 	int syscall = reg.ax;
 
+	// These pid's have their monitored values flipped to show that they are blacklisted.
 	if (table[syscall].monitored == 2 && (check_pid_monitored(reg.ax, current->pid) == 0)) {
-		// These pid's have their monitored values flipped to show that they are blacklisted.
 		log_message(current->pid, reg.ax, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
-	}  
+	}
+	// If the syscall is monitoring anyhing, check that it is monioring he current pid.
 	if (check_pid_monitored(reg.ax, current->pid) == 1){
-		// If the syscall is monitoring anyhing, check that it is monioring he current pid.
 		log_message(current->pid, reg.ax, reg.bx, reg.cx, reg.dx, reg.si, reg.di, reg.bp);
 	
 	}
-
 	return table[syscall].f(reg);
 }
 
@@ -352,6 +350,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 
 	switch(cmd) {
 		case REQUEST_SYSCALL_INTERCEPT:
+
 			// Has the right permissions, must be root.
 			if (current_uid() != 0) {
 				return -EPERM;
@@ -363,7 +362,6 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			}
 
 			// The original system call is saved.
-			//***questionable locks not sure if needed ***
 			spin_lock(&pidlist_lock);
 			table[syscall].f = sys_call_table[syscall];
 			spin_unlock(&pidlist_lock);
@@ -376,12 +374,13 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			set_addr_ro((unsigned long)sys_call_table);
 			spin_unlock(&calltable_lock);
 
-			//***questionable locks not sure if needed ***
 			spin_lock(&pidlist_lock);
 			table[syscall].intercepted = 1;
 			spin_unlock(&pidlist_lock);
 			return 0;
+
 		case REQUEST_SYSCALL_RELEASE:
+
 			// Has the right permissions, must be root.
 			if (current_uid() != 0) {
 				return -EPERM;
@@ -394,9 +393,6 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 
 			// The original saved system call is restored in the system call table
 			// in its corresponding position.
-			
-			//****add in destroy_list to clear the syscall's list of monitored PIDs****
-			
 			destroy_list(syscall);
 
 			spin_lock(&calltable_lock);
@@ -405,13 +401,14 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			set_addr_ro((unsigned long)sys_call_table);
 			spin_unlock(&calltable_lock);
 
-			//***questionable locks not sure if needed ***
 			spin_lock(&pidlist_lock);
 			table[syscall].intercepted = 0;
 			spin_unlock(&pidlist_lock);
 			return 0;
+
 		case REQUEST_START_MONITORING:
-			//If invalid pid
+
+			// If invalid pid
 			if (pid < 0){
 				return -EINVAL;
 			}
@@ -420,19 +417,11 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			if (check_pid_monitored(syscall, pid) == 1){
 				return -EBUSY;
 			}
-			
 
 			// Blacklist already monitored
 			if (table[syscall].monitored == 2 && check_pid_monitored(syscall, pid) == 0){
 				return -EINVAL;
 			}
-			/*
-			// Already being intercepted
-			if (table[syscall].intercepted == 1) {
-				printk(KERN_ALERT "We are here 5");
-				return -EBUSY;
-			}
-			*/
 
 			if (pid == 0){
 				if (current_uid() != 0) {
@@ -441,18 +430,18 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				spin_lock(&pidlist_lock);
 				destroy_list(syscall);
 				table[syscall].monitored = 2;
-
 				spin_unlock(&pidlist_lock);
 
 			} else {
 				if (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL){
-					printk(KERN_ALERT "We are here 3");
 					return -EINVAL;
 				}
+
 				// If its not root or pid not owned by parent process, return EPERM
 				if (current_uid() != 0 || check_pid_from_list(current->pid, pid) != 0){
 					return -EPERM;
 				}
+
 				// Normal implementation
 				if (table[syscall].monitored != 2){
 					spin_lock(&pidlist_lock);
@@ -462,6 +451,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 					}
 					table[syscall].monitored = 1;
 					spin_unlock(&pidlist_lock);
+
 				// Blacklist implementation flips the flags
 				} else {
 					spin_lock(&pidlist_lock);
@@ -472,24 +462,22 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 					spin_unlock(&pidlist_lock);
 				}
 			}
-			printk("return");
 			return 0;
+
 		case REQUEST_STOP_MONITORING:
-			//If invalid pid
+			
+			// If invalid pid
 			if (pid < 0){
-				printk(KERN_ALERT "We are here 5");
 				return -EINVAL;
 			}
 
 			// Not monitored for whitelist
 			if (check_pid_monitored(syscall, pid) == 0 && table[syscall].monitored == 1){
-				printk(KERN_ALERT "We are here 6");
 				return -EBUSY;
 			}
 
 			// Blacklist not monitored
 			if (table[syscall].monitored == 2 && (check_pid_monitored(syscall, pid) == 1)){
-				printk(KERN_ALERT "We are here 7");
 				return -EINVAL;
 			}
 
@@ -504,13 +492,14 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 
 			} else {
 				if (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL){
-					printk(KERN_ALERT "We are here 8");
 					return -EINVAL;
 				}
+
 				// If its not root or pid not owned by parent process, return EPERM
 				if (current_uid() != 0 || check_pid_from_list(current->pid, pid) != 0){
 					return -EPERM;
 				}
+
 				// Normal implementation
 				if (table[syscall].monitored != 2){
 					spin_lock(&pidlist_lock);
@@ -520,6 +509,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 					}
 					table[syscall].monitored = 0;
 					spin_unlock(&pidlist_lock);
+
 				// Blacklist implementation flips the flags
 				} else {
 					spin_lock(&pidlist_lock);
@@ -531,6 +521,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				}
 			}
 			return 0;
+
 		default:
 			return -EINVAL;
 	}
