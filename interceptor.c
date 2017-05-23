@@ -437,7 +437,9 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			}
 
 			if (pid == 0){
+				printk("We are here");
 				if (current_uid() != 0) {
+					printk("Shouldnt be here");
 					return -EPERM;
 				}
 				spin_lock(&pidlist_lock);
@@ -469,6 +471,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 					spin_unlock(&pidlist_lock);
 				}
 			}
+			printk("return");
 			return 0;
 		case REQUEST_STOP_MONITORING:
 			//If invalid pid
