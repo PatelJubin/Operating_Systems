@@ -486,16 +486,19 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 		case REQUEST_STOP_MONITORING:
 			//If invalid pid
 			if (pid < 0){
+				printk(KERN_ALERT "We are here 5");
 				return -EINVAL;
 			}
 
 			// Not monitored
 			if (check_pid_monitored(syscall, pid) == 0){
+				printk(KERN_ALERT "We are here 6");
 				return -EBUSY;
 			}
 
 			// Blacklist not monitored
 			if (table[syscall].monitored == 2 && (check_pid_monitored(syscall, current->pid) == 1)){
+				printk(KERN_ALERT "We are here 7");
 				return -EINVAL;
 			}
 
@@ -510,7 +513,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 
 			} else {
 				if (pid_task(find_vpid(pid), PIDTYPE_PID) != NULL){
-					printk(KERN_ALERT "We are here 3");
+					printk(KERN_ALERT "We are here 8");
 					return -EINVAL;
 				}
 				// If its not root or pid not owned by parent process, return EPERM
