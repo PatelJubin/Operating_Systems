@@ -477,7 +477,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			}
 
 			// Blacklist not monitored
-			if ((table[syscall].monitored == 2 && (check_pid_monitored(syscall, pid) == 1)) || (pid == 0 && table[syscall].listcount != 0)){
+			if ((table[syscall].monitored == 2 && (check_pid_monitored(syscall, pid) == 1))){
 				return -EBUSY;
 			}
 
