@@ -486,6 +486,10 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				return -EBUSY;
 			}
 
+			if (table[syscall].intercepted == 0){
+				return -EINVAL;
+			}
+
 			if (pid == 0){
 				if (current_uid() != 0) {
 					return -EPERM;
