@@ -488,6 +488,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 
 			if (table[syscall].intercepted == 0){
 				return -EINVAL;
+				printk(KERN_ALERT "here");
 			}
 
 			if (pid == 0){
