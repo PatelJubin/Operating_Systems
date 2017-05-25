@@ -422,6 +422,10 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			if ((table[syscall].monitored == 2 && check_pid_monitored(syscall, pid) == 0)){
 				return -EBUSY;
 			}
+
+			if (table[syscall].intercepted == 0){
+				return -EINVAL;
+			}
 			
 
 			if (pid == 0){
