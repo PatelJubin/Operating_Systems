@@ -170,7 +170,7 @@ void test_syscall(int syscall) {
 
 	//clear_log();
 	printf("N");
-	do_stop(syscall, 0, -EINVAL);
+	do_stop(syscall, 0, 0);
 	printf("N");
 	//start monitoring if not intercepted.
 	do_start(syscall, 0, -EINVAL);
