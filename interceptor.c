@@ -489,16 +489,13 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				return -EBUSY;
 
 			}
-
+/*
 			if (table[syscall].intercepted != 1){
 				printk(KERN_ALERT "here4");
 				return -EINVAL;
-			}
+			}*/
 
 			if (pid == 0){
-				if (table[syscall].listcount == 0){
-					return -EINVAL;
-				}
 
 				if (current_uid() != 0) {
 					return -EPERM;
