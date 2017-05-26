@@ -414,7 +414,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			}
 
 			// Already monitored
-			if (check_pid_monitored(syscall, pid) == 1){
+			if (table[syscall].monitored == 1 && check_pid_monitored(syscall, pid) == 1){
 				return -EBUSY;
 			}
 
