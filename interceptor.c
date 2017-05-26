@@ -409,57 +409,43 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 		case REQUEST_START_MONITORING:
 
 			// If invalid pid
-			if ((pid < 0) || ((pid != 0) && (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL)) ){
+			if (pid < 0){
 				return -EINVAL;
 			}
-			
-			//checking permissions
-			if ((current_uid() != 0) && 
-				((pid == 0) || (check_pid_from_list(current->pid, pid) != 0))){
-					return -EPERM;
-			}	
 
-			
-			// Blacklist already monitored
-			if(table[syscall].monitored == 2){
-				//if pid != 0 then check our blacklist implementation that for that pid it is being monitored
-				//if pid == 0 then check that all pid's are aready monitored i.e. listcount = 0
-				//return EBUSY if one of these statement is true
-				if (((pid !=0) && (check_pid_monitored(syscall, pid) == 0)) ||
-					((pid == 0) && (table[syscall].listcount == 0)))
-					{
+			if (table[syscall].monitored == 2){
+				if (((pid != 0) && (check_pid_monitored(syscall, pid) != 1)) ||
+					((table[syscall].listcount == 0) && (pid == 0))) {
 						return -EBUSY;
 					}
-			}else 
-			{
-				if (check_pid_monitored(syscall, pid) == 1){
+			} else {
+				if (table[syscall].monitored == 1){
 					return -EBUSY;
 				}
 			}
-
+			
 			if (table[syscall].intercepted == 0){
 				return -EINVAL;
 			}
-			
 
 			if (pid == 0){
-				/*if (current_uid() != 0) {
+				if (current_uid() != 0) {
 					return -EPERM;
-				}*/
+				}
 				spin_lock(&pidlist_lock);
 				destroy_list(syscall);
 				table[syscall].monitored = 2;
 				spin_unlock(&pidlist_lock);
 
 			} else {
-				/*if (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL){
+				if (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL){
 					return -EINVAL;
-				}*/
+				}
 
 				// If its not root or pid not owned by parent process, return EPERM
-				//if (current_uid() != 0 || check_pid_from_list(current->pid, pid) != 0){
-				//	return -EPERM;
-				//}
+				if (current_uid() != 0 || check_pid_from_list(current->pid, pid) != 0){
+					return -EPERM;
+				}
 
 				// Normal implementation
 				if (table[syscall].monitored != 2){
@@ -486,67 +472,44 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 		case REQUEST_STOP_MONITORING:
 			
 			// If invalid pid
-			if ((pid < 0) || ((pid!=0) && (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL))) {
-				return -EINVAL;
-			}
-			
-			//checking permissions
-			if (current_uid() != 0){
-				if((pid != 0) || (check_pid_from_list(current->pid, pid) !=0)){
-					return -EPERM;
-				}
-			}
-			
-			
-			//check if intercepted or monitoring already
-			if ((table[syscall].intercepted == 0) || (table[syscall].monitored == 0)){
+			if (pid < 0){
 				return -EINVAL;
 			}
 
-			//check if monitoring all pids, check if pid is in our blacklist
+			if (table[syscall].intercepted == 0 || table[syscall].monitored == 0){
+
+				return -EINVAL;
+			}
+			
 			if (table[syscall].monitored == 2){
-				if (check_pid_monitored(current->pid, pid) == 1){
+				if (check_pid_monitored(syscall, pid) == 1){
 					return -EINVAL;
 				}
-			}else
-			{
-				//if not in blacklist check our whitelist
-				if ((pid != 0) && (check_pid_monitored(current->pid, pid) == 0)){
+			}else{
+				if((pid != 0) && (check_pid_monitored(syscall, pid) == 0)){
 					return -EINVAL;
 				}
 			}
-			
-			/*// Not monitored for whitelist
-			if (check_pid_monitored(syscall, pid) == 0 && table[syscall].monitored == 1){
-				return -EBUSY;
-			}
-
-			// Blacklist not monitored
-			if ((table[syscall].monitored == 2 && (check_pid_monitored(syscall, pid) == 1))){
-				return -EBUSY;
-
-			}*/
-
 
 			if (pid == 0){
 
-				/*if (current_uid() != 0) {
+				if (current_uid() != 0) {
 					return -EPERM;
-				}*/
+				}
 				spin_lock(&pidlist_lock);
 				destroy_list(syscall);
 				table[syscall].monitored = 0;
 				spin_unlock(&pidlist_lock);
 
 			} else {
-				/*if (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL){
+				if (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL){
 					return -EINVAL;
-				}*/
+				}
 
 				// If its not root or pid not owned by parent process, return EPERM
-				/*if (current_uid() != 0 || check_pid_from_list(current->pid, pid) != 0){
+				if (current_uid() != 0 || check_pid_from_list(current->pid, pid) != 0){
 					return -EPERM;
-				}*/
+				}
 
 				// Normal implementation
 				if (table[syscall].monitored != 2){
