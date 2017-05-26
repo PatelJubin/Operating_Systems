@@ -494,7 +494,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				printk(KERN_ALERT "here4");
 				return -EINVAL;
 			}
-			printk(KERN_ALERT "%d",table[syscall].intercepted);
+			printk(KERN_ALERT "asd %d",table[syscall].intercepted);
 
 			if (pid == 0){
 
