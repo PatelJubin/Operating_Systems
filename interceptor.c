@@ -409,7 +409,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 		case REQUEST_START_MONITORING:
 
 			// If invalid pid
-			if ((pid < 0) || (pid != 0) && (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL) ){
+			if ((pid < 0) || ((pid != 0) && (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL)) ){
 				return -EINVAL;
 			}
 			
@@ -493,7 +493,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			//checking permissions
 			if (current_uid() != 0){
 				if((pid != 0) || (check_pid_from_list(current->pid, pid) !=0)){
-					-EPERM;
+					return -EPERM;
 				}
 			}
 			
