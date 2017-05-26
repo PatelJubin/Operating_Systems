@@ -473,28 +473,24 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			
 			// If invalid pid
 			if (pid < 0){
-				printk(KERN_ALERT "here1");
 				return -EINVAL;
 			}
 
 			// Not monitored for whitelist
 			if (check_pid_monitored(syscall, pid) == 0 && table[syscall].monitored == 1){
-				printk(KERN_ALERT "here2");
 				return -EBUSY;
 			}
 
 			// Blacklist not monitored
 			if ((table[syscall].monitored == 2 && (check_pid_monitored(syscall, pid) == 1))){
-				printk(KERN_ALERT "here3");
 				return -EBUSY;
 
 			}
 
 			if (table[syscall].intercepted == 0){
-				printk(KERN_ALERT "here4");
+
 				return -EINVAL;
 			}
-			printk(KERN_ALERT "asd %d",table[syscall].intercepted);
 
 			if (pid == 0){
 
