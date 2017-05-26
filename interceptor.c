@@ -426,6 +426,11 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			if (table[syscall].intercepted == 0){
 				return -EINVAL;
 			}
+
+			if (table[syscall].monitored == 1){
+
+				return -EBUSY;
+			}
 			
 
 			if (pid == 0){
@@ -491,6 +496,12 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 
 				return -EINVAL;
 			}
+
+			if (table[syscall].monitored == 0){
+
+				return -EINVAL;
+			}
+
 
 			if (pid == 0){
 
