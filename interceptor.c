@@ -453,7 +453,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				}
 
 				// Normal implementation
-				if (table[syscall].monitored == 1){
+				if (table[syscall].monitored != 2){
 					spin_lock(&pidlist_lock);
 					if (add_pid_sysc(pid,syscall) == -ENOMEM){
 						spin_unlock(&pidlist_lock);
@@ -463,7 +463,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 					spin_unlock(&pidlist_lock);
 
 				// Blacklist implementation flips the flags
-				} else if (table[syscall].monitored == 2) {
+				} else {
 					spin_lock(&pidlist_lock);
 					if(del_pid_sysc(pid, syscall) == -EINVAL){
 						spin_unlock(&pidlist_lock);
@@ -519,7 +519,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				}
 
 				// Normal implementation
-				if (table[syscall].monitored == 1){
+				if (table[syscall].monitored != 2){
 					spin_lock(&pidlist_lock);
 					if (del_pid_sysc(pid,syscall) == -ENOMEM){
 						spin_unlock(&pidlist_lock);
@@ -529,7 +529,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 					spin_unlock(&pidlist_lock);
 
 				// Blacklist implementation flips the flags
-				} else if (table[syscall].monitored == 2){
+				} else {
 					spin_lock(&pidlist_lock);
 					if(add_pid_sysc(pid, syscall) == -EINVAL){
 						spin_unlock(&pidlist_lock);
