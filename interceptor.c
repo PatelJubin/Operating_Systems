@@ -562,6 +562,8 @@ long (*orig_custom_syscall)(void);
  * - Ensure synchronization as needed.
  */
 static int init_function(void) {
+	int i;
+
 	orig_custom_syscall = sys_call_table[MY_CUSTOM_SYSCALL];
 	orig_exit_group = sys_call_table[__NR_exit_group];
 
@@ -572,7 +574,6 @@ static int init_function(void) {
 	set_addr_ro((unsigned long) sys_call_table);
 	spin_unlock(&calltable_lock);
 
-	int i;
 	spin_lock(&pidlist_lock);
 	for(i = 0 ; i<NR_syscalls;i++){
 		INIT_LIST_HEAD(&(table[i].my_list));
@@ -592,7 +593,8 @@ static int init_function(void) {
  *   then set it back to read only once done.
  * - Ensure synchronization, if needed.
  */      
-static void exit_function(void) {       
+static void exit_function(void) {  
+	int s;     
 
 	spin_lock(&calltable_lock);
 	set_addr_rw((unsigned long)sys_call_table);
@@ -601,7 +603,6 @@ static void exit_function(void) {
 	set_addr_ro((unsigned long)sys_call_table);
 	spin_unlock(&calltable_lock);
 
-	int s = 0;
 	spin_lock(&pidlist_lock);
 	for (s = 0; s < NR_syscalls; s++) {
 		destroy_list(s);
