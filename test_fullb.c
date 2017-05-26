@@ -214,7 +214,7 @@ void test_syscall(int syscall) {
 	printf("C");
 	do_stop(syscall, 1, 0);
 	printf("C");
-	do_stop(syscall, 1, -EINVAL);
+	do_stop(syscall, 1, -EBUSY);
 	printf("C!");
 	do_start(syscall, 0, 0);
 	printf("C!!");
