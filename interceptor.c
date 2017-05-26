@@ -430,10 +430,12 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 					{
 						return -EBUSY;
 					}
-			}else {
+			}else 
+			{
 				if (check_pid_monitored(syscall, pid) == 1){
 					return -EBUSY;
 				}
+			}
 
 			if (table[syscall].intercepted == 0){
 				return -EINVAL;
@@ -484,11 +486,37 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 		case REQUEST_STOP_MONITORING:
 			
 			// If invalid pid
-			if (pid < 0){
+			if ((pid < 0) || ((pid!=0) && (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL))) {
+				return -EINVAL;
+			}
+			
+			//checking permissions
+			if (current_uid() != 0){
+				if((pid != 0) || (check_pid_from_list(current->pid, pid) !=0)){
+					-EPERM;
+				}
+			}
+			
+			
+			//check if intercepted or monitoring already
+			if ((table[syscall].intercepted == 0) || (table[syscall].monitored == 0)){
 				return -EINVAL;
 			}
 
-			// Not monitored for whitelist
+			//check if monitoring all pids, check if pid is in our blacklist
+			if (table[syscall].monitored == 2){
+				if (check_pid_monitored(current->pid, pid) == 1){
+					return -EINVAL;
+				}
+			}else
+			{
+				//if not in blacklist check our whitelist
+				if ((pid != 0) && (check_pid_monitored(current->pid, pid) == 0)){
+					return -EINVAL;
+				}
+			}
+			
+			/*// Not monitored for whitelist
 			if (check_pid_monitored(syscall, pid) == 0 && table[syscall].monitored == 1){
 				return -EBUSY;
 			}
@@ -497,33 +525,28 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 			if ((table[syscall].monitored == 2 && (check_pid_monitored(syscall, pid) == 1))){
 				return -EBUSY;
 
-			}
-
-			if (table[syscall].intercepted == 0 || table[syscall].monitored == 0){
-
-				return -EINVAL;
-			}
+			}*/
 
 
 			if (pid == 0){
 
-				if (current_uid() != 0) {
+				/*if (current_uid() != 0) {
 					return -EPERM;
-				}
+				}*/
 				spin_lock(&pidlist_lock);
 				destroy_list(syscall);
 				table[syscall].monitored = 0;
 				spin_unlock(&pidlist_lock);
 
 			} else {
-				if (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL){
+				/*if (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL){
 					return -EINVAL;
-				}
+				}*/
 
 				// If its not root or pid not owned by parent process, return EPERM
-				if (current_uid() != 0 || check_pid_from_list(current->pid, pid) != 0){
+				/*if (current_uid() != 0 || check_pid_from_list(current->pid, pid) != 0){
 					return -EPERM;
-				}
+				}*/
 
 				// Normal implementation
 				if (table[syscall].monitored != 2){
