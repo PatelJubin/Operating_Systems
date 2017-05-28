@@ -448,7 +448,7 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 				destroy_list(syscall);
 				table[syscall].monitored = 2;
 			} else {
-				// check condition for our blacklist
+				// condition for our blacklist
 				if (table[syscall].monitored == 2) {
 					if (del_pid_sysc(pid, syscall) == -EINVAL) {
 						spin_unlock(&pidlist_lock);
@@ -471,48 +471,40 @@ asmlinkage long my_syscall(int cmd, int syscall, int pid) {
 		case REQUEST_STOP_MONITORING:
 			
 			// If invalid pid
-			if (pid < 0){
-				return -EINVAL;
-			}
-			//check if not being intercepted or monitored
-			if (table[syscall].intercepted == 0 || table[syscall].monitored == 0){
+			if ((pid < 0) || ((pid != 0) && (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL))){
 				return -EINVAL;
 			}
 			
-			//check if all pid's monitored
+			//check permissions
+			if (current_uid() != 0) {
+				if ((pid == 0) || (check_pid_from_list(current->pid, pid) != 0)) {
+					return -EPERM;
+				}
+			}
+			
+			//check if not intercepted or monitored
+			if (table[syscall].intercepted == 0 || table[syscall].monitored == 0){
+
+				return -EINVAL;
+			}
+			
 			if (table[syscall].monitored == 2){
-				//if all monitored check our blacklist implementation flags
-				//where the flags are flipped
 				if (check_pid_monitored(syscall, pid) == 1){
 					return -EINVAL;
 				}
 			}else{
-				//else just check normal implementation and make sure pid is not zero
 				if((pid != 0) && (check_pid_monitored(syscall, pid) == 0)){
 					return -EINVAL;
 				}
 			}
 
 			if (pid == 0){
-
-				if (current_uid() != 0) {
-					return -EPERM;
-				}
 				spin_lock(&pidlist_lock);
 				destroy_list(syscall);
 				table[syscall].monitored = 0;
 				spin_unlock(&pidlist_lock);
 
 			} else {
-				if (pid_task(find_vpid(pid), PIDTYPE_PID) == NULL){
-					return -EINVAL;
-				}
-
-				// If its not root or pid not owned by parent process, return EPERM
-				if (current_uid() != 0 || check_pid_from_list(current->pid, pid) != 0){
-					return -EPERM;
-				}
-
 				// Normal implementation
 				if (table[syscall].monitored != 2){
 					spin_lock(&pidlist_lock);
