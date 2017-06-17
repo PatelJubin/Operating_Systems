@@ -12,6 +12,8 @@ extern int debug;
 
 extern struct frame *coremap;
 
+unsigned int curr_stamp;
+
 /* Page to evict is chosen using the accurate LRU algorithm.
  * Returns the page frame number (which is also the index in the coremap)
  * for the page that is to be evicted.
@@ -27,7 +29,10 @@ int lru_evict() {
  * Input: The page table entry for the page that is being accessed.
  */
 void lru_ref(pgtbl_entry_t *p) {
-
+	int pg_frame = p->frame >> PAGE_SHIFT;
+	//setting the current time stamp
+	coremape[p_frame].timestamp = curr_stamp;
+	curr_stamp += 1;
 	return;
 }
 
@@ -36,4 +41,5 @@ void lru_ref(pgtbl_entry_t *p) {
  * replacement algorithm 
  */
 void lru_init() {
+	curr_stamp = 0;
 }
