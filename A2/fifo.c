@@ -19,7 +19,7 @@ unsigned int fifo_front;
  * for the page that is to be evicted.
  */
 int fifo_evict() {
-	unsigned int coremap_idx = fifo_front; //page at the front of the queue is selected to evict
+	int coremap_idx = fifo_front; //page at the front of the queue is selected to evict
 	fifo_front = (fifo_front + 1) % memsize;
 	return coremap_idx;
 }
