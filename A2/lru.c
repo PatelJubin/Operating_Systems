@@ -20,8 +20,18 @@ unsigned int curr_stamp;
  */
 
 int lru_evict() {
+	int page = 0;
+	int i;
+	unsigned long old = curr_stamp;
+
+	for (i = 0; i < memsize; i++){
+		if (coremap[i].pte->timestamp < old){
+			old = coremap[i].pte->timestamp;
+			page = i;
+		}
+	}
 	
-	return 0;
+	return page;
 }
 
 /* This function is called on each access to a page to update any information
@@ -29,10 +39,10 @@ int lru_evict() {
  * Input: The page table entry for the page that is being accessed.
  */
 void lru_ref(pgtbl_entry_t *p) {
-	int pg_frame = p->frame >> PAGE_SHIFT;
-	//setting the current time stamp
-	coremape[p_frame].timestamp = curr_stamp;
-	curr_stamp += 1;
+	// int pg_frame = p->frame >> PAGE_SHIFT;
+	// setting the current time stamp
+	p->timestamp = curr_stamp;
+	curr_stamp++;
 	return;
 }
 
