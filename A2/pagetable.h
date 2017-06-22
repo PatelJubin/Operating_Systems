@@ -53,7 +53,6 @@ typedef struct {
 // Page table entry (2nd-level). 
 typedef struct { 
 	unsigned int frame; // if valid bit == 1, physical frame holding vpage
-	unsigned int timestamp; //the time of a frame
 	off_t swap_off;       // offset in swap file of vpage, if any
 } pgtbl_entry_t;    
 
@@ -64,6 +63,7 @@ extern void print_pagedirectory(void);
 
 struct frame {
 	char in_use;       // True if frame is allocated, False if frame is free
+	unsigned int timestamp; //the time of a frame
 	pgtbl_entry_t *pte;// Pointer back to pagetable entry (pte) for page
 	                   // stored in this frame
 };

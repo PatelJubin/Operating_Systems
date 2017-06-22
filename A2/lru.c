@@ -25,8 +25,8 @@ int lru_evict() {
 	unsigned long old = curr_stamp;
 
 	for (i = 0; i < memsize; i++){
-		if (coremap[i].pte->timestamp < old){
-			old = coremap[i].pte->timestamp;
+		if (coremap[i].timestamp < old){
+			old = coremap[i].timestamp;
 			page = i;
 		}
 	}
@@ -41,7 +41,7 @@ int lru_evict() {
 void lru_ref(pgtbl_entry_t *p) {
 	// int pg_frame = p->frame >> PAGE_SHIFT;
 	// setting the current time stamp
-	p->timestamp = curr_stamp;
+	p->frame.timestamp = curr_stamp;
 	curr_stamp++;
 	return;
 }
