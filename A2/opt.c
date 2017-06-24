@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "pagetable.h"
 
+unsigned long count;
 
 extern int memsize;
 
@@ -26,7 +27,10 @@ int opt_evict() {
  * Input: The page table entry for the page that is being accessed.
  */
 void opt_ref(pgtbl_entry_t *p) {
-
+	int frame;
+	frame = (p->frame >> PAGE_SHIFT);
+	p->frame.timestamp = counter;
+	counter++;
 	return;
 }
 
@@ -34,6 +38,7 @@ void opt_ref(pgtbl_entry_t *p) {
  * replacement algorithm.
  */
 void opt_init() {
+	count = 0;
 
 }
 
