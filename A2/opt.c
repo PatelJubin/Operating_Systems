@@ -110,7 +110,7 @@ void opt_init() {
 	
 	
 	//taken from sim.c we parse through our tracefile and populate our virt_addr_list.
-	while(fgets(buf, MAXLINE, infp) != NULL) {
+	while(fgets(buf, MAXLINE, tfp) != NULL) {
 		if(buf[0] != '=') {
 			sscanf(buf, "%c %lx", &type, &vaddr);
 			virt_addr_list[i] = vaddr;
