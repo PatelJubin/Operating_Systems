@@ -39,9 +39,8 @@ int lru_evict() {
  * Input: The page table entry for the page that is being accessed.
  */
 void lru_ref(pgtbl_entry_t *p) {
-	// int pg_frame = p->frame >> PAGE_SHIFT;
 	// setting the current time stamp
-	p->frame.timestamp = curr_stamp;
+	coremap[p->frame >> PAGESHIFT].timestamp = curr_stamp;
 	curr_stamp++;
 	return;
 }
