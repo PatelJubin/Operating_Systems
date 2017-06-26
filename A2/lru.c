@@ -40,7 +40,7 @@ int lru_evict() {
  */
 void lru_ref(pgtbl_entry_t *p) {
 	// setting the current time stamp
-	coremap[p->frame >> PAGESHIFT].timestamp = curr_stamp;
+	coremap[p->frame >> PAGE_SHIFT].timestamp = curr_stamp;
 	curr_stamp++;
 	return;
 }

@@ -19,7 +19,7 @@ unsigned int tr_size;
 addr_t *virt_addr_list; //list of virtual address in trace file
 addr_t *mem_addr_list; //list of virtual address in memory
 unsigned int *used_next;
-unsigned long count_idx;
+unsigned int count_idx;
 
 /* Page to evict is chosen using the optimal (aka MIN) algorithm. 
  * Returns the page frame number (which is also the index in the coremap)
@@ -35,10 +35,9 @@ int opt_evict() {
  * Input: The page table entry for the page that is being accessed.
  */
 void opt_ref(pgtbl_entry_t *p) {
-	int frame;
-	frame = (p->frame >> PAGE_SHIFT);
-	p->frame.timestamp = counter;
-	counter++;
+	//store the virtual addresses into a list
+	mem_addr_list[p->frame >> PAGE_SHIFT] = virt_addr_list[count_idx];
+	count_idx++;
 	return;
 }
 
