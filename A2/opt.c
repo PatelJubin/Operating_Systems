@@ -14,12 +14,12 @@ extern int debug;
 extern struct frame *coremap;
 
 extern char *tracefile;
-unsigned int tr_size;
+ int tr_size = 0;
 //using struct addr_t from pagetable.h which is just unsigned long
-addr_t *virt_addr_list; //list of virtual address in trace file
-addr_t *mem_addr_list; //list of virtual address in memory
-unsigned int *used_next;
-unsigned int count_idx;
+int *virt_addr_list; //list of virtual address in trace file
+int *mem_addr_list; //list of virtual address in memory
+int *used_next;
+static int count_idx;
 
 /* Page to evict is chosen using the optimal (aka MIN) algorithm. 
  * Returns the page frame number (which is also the index in the coremap)
@@ -54,7 +54,7 @@ int opt_evict() {
 	//swap out our furthest index and frame if our current frame's
 	//virtual address has a longer distance
 	for(k = 0; k < memsize; k++){
-		if (used_next[k] < longest_nextUsed){
+		if (used_next[k] > longest_nextUsed){
 				evict_frame = k;
 				longest_nextUsed = used_next[k];
 		}
