@@ -13,4 +13,20 @@
 unsigned char *disk;
 
 int main(int argc, char *argv[]) {
+	//Check number of arguments
+	if(argc != 3){
+		fprintf(stderr, "Usage: ext2_rm <image file name> <path>\n");
+		exit(1);
+	}
+	//Open image
+	int fd = open(argv[1], O_RDWR);
+
+	//Map disk image
+	disk = mmap(NULL, 128 * 1024, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if(disk == MAP_FAILED) {
+		perror("mmap");
+		exit(1);
+	}
+
+	//Code for rm...
 }
