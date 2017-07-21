@@ -29,4 +29,29 @@ int main(int argc, char *argv[]) {
 	}
 
 	//Code for ls...
+
+	//Get inode (TO DO) struct ext2_inode *inode = find_inode(...);
+	//TO BE REPLACED ONCE FIND_INODE IS IMPLEMENTED
+	struct ext2_inode *inode;
+
+	//Pointers for current block
+	unsigned int *curr_block = inode->i_block;
+
+	//Each entry is saved here
+	struct ext2_dir_entry_2 *entry;
+
+	//Name of directory is saved here before printing
+	char name[256];
+
+	int i = 0;
+	while (i < 15 && curr_block[i]){
+		unsigned int curr_size = 0;
+		entry = (struct ext2_dir_entry_2 *) (disk + (curr_block[i] * EXT2_BLOCK_SIZE));
+		while (curr_size <= EXT2_BLOCK_SIZE){
+			strnpy(name, entry->name, entry->name_len);
+			printf("%s\n", name);
+			curr_size += entry->rec_len;
+		}
+	}
+	return 0;
 }
