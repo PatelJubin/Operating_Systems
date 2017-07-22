@@ -14,8 +14,8 @@ unsigned char *disk;
 
 int main(int argc, char *argv[]) {
 	//Check number of arguments
-	if(argc != 3){
-		fprintf(stderr, "Usage: ext2_ls <image file name> <path>\n");
+	if(argc != 3 || argc != 4){
+		fprintf(stderr, "Usage: ext2_ls <image file name> <flag> <path>\n");
 		exit(1);
 	}
 	//Open image
@@ -28,10 +28,19 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
+	int flag = 0;
+
+	if (argc == 4) {
+		if (strncmp(argv[2],"-a") == 0){
+			flag = 1;
+		}
+	}
+
 	//Code for ls...
 
 	//Get inode (TO DO) struct ext2_inode *inode = find_inode(...);
 	//TO BE REPLACED ONCE FIND_INODE IS IMPLEMENTED
+	//KEEP IN MIND THE ARGV[i] DEPENDS ON IF THERE IS A FLAG
 	struct ext2_inode *inode;
 
 	//Pointers for current block
@@ -40,18 +49,25 @@ int main(int argc, char *argv[]) {
 	//Each entry is saved here
 	struct ext2_dir_entry_2 *entry;
 
-	//Name of directory is saved here before printing
-	char name[256];
-
 	int i = 0;
+	//Loop throught the 15 block pointers
 	while (i < 15 && curr_block[i]){
 		unsigned int curr_size = 0;
+		//Get the first entry
 		entry = (struct ext2_dir_entry_2 *) (disk + (curr_block[i] * EXT2_BLOCK_SIZE));
 		while (curr_size <= EXT2_BLOCK_SIZE){
-			strnpy(name, entry->name, entry->name_len);
-			printf("%s\n", name);
+			if ((flag) && (entry->namme_len != 0)){
+				printf("%s\n", entry->name);
+			} else {
+				if ((entry->name_len != 0) && (strncmp(entry->name, "..") != 0)){
+					printf("%s\n", entry->name);
+				}
+			}
 			curr_size += entry->rec_len;
+			//Get the next entry
+			entry = (struct ext2_dir_entry_2 *)curr_size;
 		}
+		i++;
 	}
 	return 0;
 }
