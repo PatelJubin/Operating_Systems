@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 		//Get the first entry
 		entry = (struct ext2_dir_entry_2 *)curr_ptr;
 		while (curr_ptr < end){
-			if ((flag) && (entry->namme_len != 0)){
+			if ((flag) && (entry->name_len != 0)){
 				printf("%s\n", entry->name);
 			} else {
 				if ((entry->name_len != 0) && (strncmp(entry->name, "..") != 0)){
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 			}
 			curr_ptr += entry->rec_len;
 			//Get the next entry
-			entry = (struct ext2_dir_entry_2 *)curr_size;
+			entry = (struct ext2_dir_entry_2 *)curr_ptr;
 		}
 		i++;
 	}
