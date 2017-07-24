@@ -50,12 +50,14 @@ int main(int argc, char *argv[]) {
 	struct ext2_dir_entry_2 *entry;
 
 	int i = 0;
-	//Loop throught the 15 block pointers
-	while (i < 15 && curr_block[i]){
-		unsigned int curr_size = 0;
+	//Loop throught the 12 block pointers
+	while (i < 12 && curr_block[i]){
+		unsigned char *curr_ptr = disk + (curr_block[i] * EXT2_BLOCK_SIZE);
+		//Max
+		unsigned char *end = curr_ptr + EXT2_BLOCK_SIZE;
 		//Get the first entry
-		entry = (struct ext2_dir_entry_2 *) (disk + (curr_block[i] * EXT2_BLOCK_SIZE));
-		while (curr_size <= EXT2_BLOCK_SIZE){
+		entry = (struct ext2_dir_entry_2 *)curr_ptr;
+		while (curr_ptr < end){
 			if ((flag) && (entry->namme_len != 0)){
 				printf("%s\n", entry->name);
 			} else {
@@ -63,7 +65,7 @@ int main(int argc, char *argv[]) {
 					printf("%s\n", entry->name);
 				}
 			}
-			curr_size += entry->rec_len;
+			curr_ptr += entry->rec_len;
 			//Get the next entry
 			entry = (struct ext2_dir_entry_2 *)curr_size;
 		}
