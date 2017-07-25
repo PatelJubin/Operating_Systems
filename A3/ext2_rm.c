@@ -29,4 +29,30 @@ int main(int argc, char *argv[]) {
 	}
 
 	//Code for rm...
+	ext2_group_desc *gp_desc = (struct ext2_group_desc *)disk + (EXT2_BLOCK_SIZE * EXT2_ROOT_INO);
+	unsigned int bitmap_i = gp_desc->bg_inode_bitmap;
+	unsigned int bitmap_b = gp_desc->bg_block_bitmap;
+
+	struct ext2_inode *inode;
+	struct ext2_inode *target;
+
+	//Pointers for current block
+	unsigned int *curr_block = inode->i_block;
+	unsigned int target_file = find_inode(...);
+
+	int i = 0;
+	for(i=0; i<12 && curr_block[i]; i++) {
+		struct ext2_dir_entry_2 *dir = (struct ext2_dir_entry_2 *)(disk + EXT2_BLOCK_SIZE * curr_block);
+
+		int j=0;
+		for(j=0; j<EXT2_BLOCK_SIZE; j+= dir->rec_len) {
+			if (dir->inode == target_file) {
+				if(target->i_links_count == 0){
+					
+				}
+			}
+		}
+	}
+
+
 }
