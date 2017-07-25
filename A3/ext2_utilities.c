@@ -25,7 +25,7 @@ char *split_path = strtok_r(path, "/", &rest);
 while (split_path != NULL && block < 12 && root_inode->i_block[block]){
 
 	while( 
-		if (strcmp(split_path, dir->name, dir->name_len) == 0){
+		if (strncmp(split_path, dir->name, dir->name_len) == 0){
 			root_inode = &inode_table[dir->inode]; 
 			block = 0;
 		}
