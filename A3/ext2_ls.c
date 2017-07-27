@@ -42,6 +42,15 @@ int main(int argc, char *argv[]) {
 	//TO BE REPLACED ONCE FIND_INODE IS IMPLEMENTED
 	//KEEP IN MIND THE ARGV[i] DEPENDS ON IF THERE IS A FLAG
 	struct ext2_inode *inode;
+	if (flag){
+		inode = find_inode(argv[3], disk);
+	}else{
+		inode = find_inode(argv[2], disk);
+	}
+	if (inode == NULL){
+		printf("No such file or directory\n");
+		exit(ENOENT);
+	}
 
 	//Pointers for current block
 	unsigned int *curr_block = inode->i_block;
