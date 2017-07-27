@@ -15,7 +15,7 @@
 struct ext2_inode *find_inode (char *path, unsigned char *disk){
 	ext2_group_desc *gp_desc = (struct ext2_group_desc *)disk + (EXT2_BLOCK_SIZE * EXT2_ROOT_INO);
 	ext2_inode *inode_table = (struct ext2_inode *) disk + (EXT2_BLOCK_SIZE * gp_desc->bg_inode_table);
-	ext2_inode *root_inode = &inode_table[EXT2_ROOT_INO];
+	ext2_inode *root_inode = &inode_table[EXT2_ROOT_INO - 1];
 
 	int block = 0;
 	int block_size = 0;
