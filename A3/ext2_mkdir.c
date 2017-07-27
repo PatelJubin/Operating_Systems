@@ -9,6 +9,7 @@
 #include "ext2.h"
 #include <errno.h>
 #include <string.h>
+#include <ext2_utilities.h>
 
 unsigned char *disk;
 
@@ -27,6 +28,41 @@ int main(int argc, char *argv[]) {
 		perror("mmap");
 		exit(1);
 	}
+	
+	char *parent_dir = find_parent(argv[2]);
+	struct ext2_inode *p_inode = find_inode(parent_dir, disk);
+	
+	//error checking
+	if(p_inode == NULL){
+		printf("directory path doesn't exist");
+		exit(ENOENT);
+	}
+	if(find_inode(argv[2], disk) != NULL){
+		printf("file/directory exists");
+		exit(EEXIST);
+	}
+	//code for mkdir
+	
+}
 
-	//Code for mkdir...
+char *find_parent(char *path){
+	//copy path to use for strtok
+	char *copy_path = malloc(sizeof(char)*(strlen(path)+1));
+	strncpy(copy_path, path, strlen(path));
+	//split path on / to check if at root
+	char *split_path = strtok(copy_path, "/");
+	//get the string after the last "/" which is the last entry in the path
+	char *last_dir = strrchr(path, '/');
+	char *parent = NULL;
+	
+	//if split path is null return root
+	if (split_path == NULL){
+		return "/";
+	}
+	else
+	{
+		parent = strndup(path, last_dir - path);
+		return parent;
+	}
+	
 }
