@@ -33,26 +33,40 @@ int main(int argc, char *argv[]) {
 	unsigned int bitmap_i = gp_desc->bg_inode_bitmap;
 	unsigned int bitmap_b = gp_desc->bg_block_bitmap;
 
-	struct ext2_inode *inode;
-	struct ext2_inode *target;
+	struct ext2_inode *current_file = find_inode(argv[2], disk);
+
+	if(current_file == NULL){
+		printf("directory file/path doesn't exist");
+		exit(ENOENT);
+	}
+
+	struct ext2_inode *parent_dir = find_inode(find_parent(argv[2]));
+
+	if(parent_dir == NULL){
+		printf("directory file/path doesn't exist");
+		exit(ENOENT);
+	}
 
 	//Pointers for current block
-	unsigned int *curr_block = inode->i_block;
-	unsigned int target_file = find_inode(...);
+	unsigned int *curr_block = parent_dir->i_block;
+	unsigned int inode_num;
 
 	int i = 0;
 	for(i=0; i<12 && curr_block[i]; i++) {
-		struct ext2_dir_entry_2 *dir = (struct ext2_dir_entry_2 *)(disk + EXT2_BLOCK_SIZE * curr_block);
+		struct ext2_dir_entry_2 *dir = (struct ext2_dir_entry_2 *)(disk + EXT2_BLOCK_SIZE * curr_block[i]);
 
-		int j=0;
-		for(j=0; j<EXT2_BLOCK_SIZE; j+= dir->rec_len) {
-			if (dir->inode == target_file) {
-				if(target->i_links_count == 0){
-					
-				}
-			}
+		int j = 0;
+		while (j < EXT2_BLOCK_SIZE) {
+			j += dir->rec_len;
+			if (dir->file_type == EXT2_FT_REG_FILE && strncmp(file_name, dir->name, dir->name_len) == 0) {
+        		struct ext2_dir_entry_2 *previous_dir = (struct ext2_dir_entry_2 *)(disk + EXT2_BLOCK_SIZE * curr_block[i]);;
+      		}
 		}
+		dir = (struct ext2_dir_entry_2 *)((char *)dir + dir->rec_len);
 	}
 
+	curr_block = current_file->i_block;
+	if (current_file->i_links_count == 0) {
 
+	}
 }
