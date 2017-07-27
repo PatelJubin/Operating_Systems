@@ -28,25 +28,21 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
+	//Code for ls...
+	struct ext2_inode *inode;
 	int flag = 0;
 
 	if (argc == 4) {
 		if (strncmp(argv[2],"-a") == 0){
 			flag = 1;
+			inode = find_inode(argv[3], disk);
+		}else{
+			printf("Flag must be -a");
 		}
-	}
-
-	//Code for ls...
-
-	//Get inode (TO DO) struct ext2_inode *inode = find_inode(...);
-	//TO BE REPLACED ONCE FIND_INODE IS IMPLEMENTED
-	//KEEP IN MIND THE ARGV[i] DEPENDS ON IF THERE IS A FLAG
-	struct ext2_inode *inode;
-	if (flag){
-		inode = find_inode(argv[3], disk);
 	}else{
 		inode = find_inode(argv[2], disk);
 	}
+
 	if (inode == NULL){
 		printf("No such file or directory\n");
 		exit(ENOENT);
