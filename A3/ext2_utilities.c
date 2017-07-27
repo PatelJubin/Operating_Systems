@@ -32,7 +32,7 @@ struct ext2_inode *find_inode (char *path, unsigned char *disk){
 		//Loop until the we get to the end of the block
 		while(block_size <= EXT2_BLOCK_SIZE){ 
 			if (strncmp(curr_path, dir->name, dir->name_len) == 0){
-				root_inode = &inode_table[dir->inode];
+				root_inode = &inode_table[dir->inode - 1];
 				//Since we go into a new dir, we have to reset block.
 				block = 0;
 				curr_path = strtok_r(rest, "/", &rest);
