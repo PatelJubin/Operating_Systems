@@ -32,17 +32,19 @@ int main(int argc, char *argv[]) {
 	struct ext2_inode *inode;
 	int flag = 0;
 
+	//Get the inode from the arg
 	if (argc == 4) {
 		if (strncmp(argv[2],"-a") == 0){
 			flag = 1;
 			inode = find_inode(argv[3], disk);
 		}else{
-			printf("Flag must be -a");
+			printf("<flag> must be -a");
 		}
 	}else{
 		inode = find_inode(argv[2], disk);
 	}
 
+	//Error checking
 	if (inode == NULL){
 		printf("No such file or directory\n");
 		exit(ENOENT);
@@ -62,11 +64,13 @@ int main(int argc, char *argv[]) {
 		unsigned char *end = curr_ptr + EXT2_BLOCK_SIZE;
 		//Get the first entry
 		entry = (struct ext2_dir_entry_2 *)curr_ptr;
+
+		//Loop through the entrys of the blocks
 		while (curr_ptr < end){
 			if ((flag) && (entry->name_len != 0)){
 				printf("%s\n", entry->name);
 			} else {
-				if ((entry->name_len != 0) && (strncmp(entry->name, "..") != 0)){
+				if ((entry->name_len != 0) && (strncmp(entry->name, "..") != 0) && (strncmp(entry->name, ".") != 0)){
 					printf("%s\n", entry->name);
 				}
 			}

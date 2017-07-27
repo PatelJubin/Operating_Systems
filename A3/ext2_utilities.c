@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -13,24 +14,33 @@
 
 
 struct ext2_inode *find_inode (char *path, unsigned char *disk){
+	/*
+	We get the root inode by getting the descriptor for the root, then getting the inode_table entry for
+	the root.
+	*/
 	ext2_group_desc *gp_desc = (struct ext2_group_desc *)disk + (EXT2_BLOCK_SIZE * EXT2_ROOT_INO);
 	ext2_inode *inode_table = (struct ext2_inode *) disk + (EXT2_BLOCK_SIZE * gp_desc->bg_inode_table);
 	ext2_inode *root_inode = &inode_table[EXT2_ROOT_INO - 1];
 
+	//Initialize block and dir
 	int block = 0;
-	int block_size = 0;
 	ext2_dir_entry_2 *dir;
+
+	//We will split the path until we get to NULL
 	char *rest;
 	char *curr_path = strtok_r(path, "/", &rest);
 
-
+	//Loop through the blocks of the current dir
 	while (curr_path != NULL && block < 12){
-
+		//Changes which BLOCK is pointed to
 		unsigned char *curr_ptr = disk + (EXT2_BLOCK_SIZE * root_inode->i_block[block]);
+		//Max
+		unsigned char *end = curr_ptr + EXT2_BLOCK_SIZE;
+		//Get the entry
 		dir = (struct ext2_dir_entry_2 *)curr_ptr;
 
 		//Loop until the we get to the end of the block
-		while(block_size <= EXT2_BLOCK_SIZE){ 
+		while(curr_ptr < end){ 
 			if (strncmp(curr_path, dir->name, dir->name_len) == 0){
 				root_inode = &inode_table[dir->inode - 1];
 				//Since we go into a new dir, we have to reset block.
@@ -38,7 +48,9 @@ struct ext2_inode *find_inode (char *path, unsigned char *disk){
 				curr_path = strtok_r(rest, "/", &rest);
 				break;
 			}
-			block_size += dir->rec_len;
+			//Go to the next entry in the current block
+			curr_ptr += dir->rec_len;
+			dir = dir = (struct ext2_dir_entry_2 *)curr_ptr;
 		}
 		block++;
 	}
