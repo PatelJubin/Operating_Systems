@@ -1,0 +1,1 @@
+struct ext2_inode *find_inode(char *path, unsigned char *disk);
