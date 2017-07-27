@@ -68,5 +68,12 @@ int main(int argc, char *argv[]) {
 	curr_block = current_file->i_block;
 	if (current_file->i_links_count == 0) {
 
+		//to-do implement block unsets.
+		
+		int k, blocks;
+        for (k = 0; k < 12 && curr_block[j]; k++) {
+        	curr_block[j] = 0;
+        	blocks++;
+        }
 	}
 }
