@@ -63,4 +63,28 @@ struct ext2_inode *find_inode (char *path, unsigned char *disk){
 	}
 }
 
+char *find_parent(char *path){
+	//copy path to use for strtok
+	char *copy_path = malloc(sizeof(char)*(strlen(path)+1));
+	strncpy(copy_path, path, strlen(path));
+	//split path on / to check if at root
+	char *split_path = strtok(copy_path, "/");
+	//get the string after the last "/" which is the last entry in the path
+	//this includes the "/" as well
+	char *last_dir = strrchr(path, '/');
+	char *parent = NULL;
+	
+	//if split path is null return root
+	if (split_path == NULL){
+		return "/";
+	}
+	else
+	{
+		//copy the parent path into parent and return
+		parent = strndup(path, last_dir - path);
+		return parent;
+	}
+	
+}
+
 

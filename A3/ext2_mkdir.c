@@ -44,25 +44,3 @@ int main(int argc, char *argv[]) {
 	//code for mkdir
 	
 }
-
-char *find_parent(char *path){
-	//copy path to use for strtok
-	char *copy_path = malloc(sizeof(char)*(strlen(path)+1));
-	strncpy(copy_path, path, strlen(path));
-	//split path on / to check if at root
-	char *split_path = strtok(copy_path, "/");
-	//get the string after the last "/" which is the last entry in the path
-	char *last_dir = strrchr(path, '/');
-	char *parent = NULL;
-	
-	//if split path is null return root
-	if (split_path == NULL){
-		return "/";
-	}
-	else
-	{
-		parent = strndup(path, last_dir - path);
-		return parent;
-	}
-	
-}
