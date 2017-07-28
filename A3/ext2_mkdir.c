@@ -41,6 +41,15 @@ int main(int argc, char *argv[]) {
 		printf("file/directory exists");
 		exit(EEXIST);
 	}
+	unsigned int check_inode = check_inode_bitmap(disk);
+	unsigned int check_blk = check_block_bitmap(disk);
+	
+	if((check_inode == -1) || (check_blk == -1)){
+		prinf("no space in bitmap");
+		exit();
+	}	
+	
+	
 	//code for mkdir
 	
 }
