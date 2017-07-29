@@ -112,8 +112,8 @@ unsigned int check_block_bitmap(unsigned char *disk){
 unsigned int check_inode_bitmap(unsigned char *disk){
 	struct ext2_super_block *sp_block = (struct ext2_super_block *) (disk + EXT2_BLOCK_SIZE);
 	struct ext2_group_desc *gp_desc = (struct ext2_group_desc *)(disk + (EXT2_ROOT_INO*EXT2_BLOCK_SIZE));
-	//check number of free blocks
-	if (sp_block->s_free_blocks_count > 0){
+	//check number of free inode
+	if (sp_block->s_free_inode_count > 0){
 		char *inode_bitmap = (char *)(disk + (gp_desc->bg_inode_bitmap * EXT2_BLOCK_SIZE));
 		int i;
 		int j;
