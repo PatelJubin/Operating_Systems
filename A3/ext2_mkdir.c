@@ -30,6 +30,8 @@ int main(int argc, char *argv[]) {
 	}
 	
 	char *parent_dir = find_parent(argv[2]);
+	struct ext2_group_desc *gp_desc = (struct ext2_group_desc *)(disk + (EXT2_BLOCK_SIZE * EXT2_ROOT_INO));
+	struct ext2_inode *inode_table = (struct ext2_inode *)(disk + (EXT2_BLOCK_SIZE * gp_desc->bg_inode_table));
 	struct ext2_inode *p_inode = find_inode(parent_dir, disk);
 	
 	//error checking
@@ -47,8 +49,12 @@ int main(int argc, char *argv[]) {
 	if((check_inode == -1) || (check_blk == -1)){
 		prinf("no space in bitmap");
 		exit();
-	}	
-	
+	}else
+	{
+		set_inode_bit(disk);
+		set_block_bit(disk);
+		struct ext2_inode *inode = inode = &(inode_table[check_inode -1]);
+	}
 	
 	//code for mkdir
 	
