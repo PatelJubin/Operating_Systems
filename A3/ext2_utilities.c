@@ -131,3 +131,25 @@ unsigned int check_inode_bitmap(unsigned char *disk){
 	//else return -1 if no free inode found
 	return -1;
 }
+
+void set_inode_bit(unsigned char *disk){
+	//get the free inode bit
+	unsigned int check_inode = check_inode_bitmap(disk);
+	struct ext2_group_desc *gp_desc = (struct ext2_group_desc *)(disk + (EXT2_BLOCK_SIZE*EXT2_ROOT_INO));
+	struct ext2_super_block *sp_block = (struct ext2_super_block *)(disk + EXT2_BLOCK_SIZE);
+	//decrease the available # of free inodes
+	sp_block->s_free_inode_count--;
+	//set inode bitmap
+	
+}
+
+void set_block_bit(unsigned char *disk){
+	//get free block bit
+	unsigned int check_block = check_block_bitmap(disk);
+	struct ext2_group_desc *gp_desc = (struct ext2_group_desc *)(disk + (EXT2_BLOCK_SIZE*EXT2_ROOT_INO));
+	struct ext2_super_block *sp_block = (struct ext2_super_block *)(disk + EXT2_BLOCK_SIZE);
+	
+	//decrease available # of free blocks
+	sp_block->s_free_blocks_count--;
+	//set block bit
+}
