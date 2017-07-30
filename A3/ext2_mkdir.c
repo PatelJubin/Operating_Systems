@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 	inode->i_mode = EXT2_S_IFDIR;
 	inode->i_links_count = 1;
 	inode->i_size = EXT2_BLOCK_SIZE;
-	inode->i_block = 1;
+	inode->i_blocks = 1;
 	inode->i_block[0] = check_inode;
 	//code for mkdir
 	
