@@ -30,20 +30,20 @@ int main(int argc, char *argv[]) {
 	}
 
 	//Code for ls...
-	//struct ext2_inode *inode;
 	int flag = 0;
-
+	int element;
 	//Get the inode from the arg
 	if (argc == 4) {
-		if (strcmp(argv[2],"-a", ) == 0){
+		if (strcmp(argv[2],"-a") == 0){
 			flag = 1;
-			struct ext2_inode *inode = find_inode(argv[3], disk);
+			element = 3;
 		}else{
 			printf("<flag> must be -a");
 		}
 	}else{
-		struct ext2_inode *inode = find_inode(argv[2], disk);
+		element = 4;
 	}
+	struct ext2_inode *inode = find_inode(argv[element], disk);
 
 	//Error checking
 	if (inode == NULL){
