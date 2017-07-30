@@ -53,11 +53,11 @@ int main(int argc, char *argv[]) {
 	{
 		set_inode_bit(disk);
 		set_block_bit(disk);
-		struct ext2_inode *inode = &(inode_table[check_inode -1]);
-		struct ext2_dir_entry_2 *dir = (struct ext2_dir_entry_2 *)(disk + (check_blk *EXT2_BLOCK_SIZE));
-
 	}
-		
+	
+	struct ext2_inode *inode = &(inode_table[check_inode -1]);
+	struct ext2_dir_entry_2 *dir = (struct ext2_dir_entry_2 *)(disk + (check_blk *EXT2_BLOCK_SIZE));	
+	
 	inode->i_mode = EXT2_S_IFDIR;
 	inode->i_links_count = 1;
 	inode->i_size = EXT2_BLOCK_SIZE;
