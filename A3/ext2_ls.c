@@ -29,19 +29,19 @@ int main(int argc, char *argv[]) {
 	}
 
 	//Code for ls...
-	struct ext2_inode *inode;
+	//struct ext2_inode *inode;
 	int flag = 0;
 
 	//Get the inode from the arg
 	if (argc == 4) {
-		if (strncmp(argv[2],"-a") == 0){
+		if (strcmp(argv[2],"-a", ) == 0){
 			flag = 1;
-			inode = find_inode(argv[3], disk);
+			struct ext2_inode *inode = find_inode(argv[3], disk);
 		}else{
 			printf("<flag> must be -a");
 		}
 	}else{
-		inode = find_inode(argv[2], disk);
+		struct ext2_inode *inode = find_inode(argv[2], disk);
 	}
 
 	//Error checking
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 			if ((flag) && (entry->name_len != 0)){
 				printf("%s\n", entry->name);
 			} else {
-				if ((entry->name_len != 0) && (strncmp(entry->name, "..") != 0) && (strncmp(entry->name, ".") != 0)){
+				if ((entry->name_len != 0) && (strcmp(entry->name, "..") != 0) && (strcmp(entry->name, ".") != 0)){
 					printf("%s\n", entry->name);
 				}
 			}
