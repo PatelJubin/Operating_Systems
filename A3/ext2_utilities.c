@@ -49,7 +49,7 @@ struct ext2_inode *find_inode (char *path, unsigned char *disk){
 			}
 			//Go to the next entry in the current block
 			curr_ptr += dir->rec_len;
-			dir = dir = (struct ext2_dir_entry_2 *)curr_ptr;
+			dir = (struct ext2_dir_entry_2 *)curr_ptr;
 		}
 		block++;
 	}
@@ -113,7 +113,7 @@ unsigned int check_inode_bitmap(unsigned char *disk){
 	struct ext2_super_block *sp_block = (struct ext2_super_block *) (disk + EXT2_BLOCK_SIZE);
 	struct ext2_group_desc *gp_desc = (struct ext2_group_desc *)(disk + (EXT2_ROOT_INO*EXT2_BLOCK_SIZE));
 	//check number of free inode
-	if (sp_block->s_free_inode_count > 0){
+	if (sp_block->s_free_inodes_count > 0){
 		char *inode_bitmap = (char *)(disk + (gp_desc->bg_inode_bitmap * EXT2_BLOCK_SIZE));
 		int i;
 		int j;
