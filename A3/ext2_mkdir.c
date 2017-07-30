@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
 	for(i = 0; i < 12 && p_inode->i_block[i] ; i++)
 	{
 		int block_size;
-		struct ext2_dir_entry_2 d_entry = (struct ext2_dir_entry_2 *)(disk +(p_inode->i_block[i] * EXT2_BLOCK_SIZE));
+		struct ext2_dir_entry_2 *d_entry = (struct ext2_dir_entry_2 *)(disk +(p_inode->i_block[i] * EXT2_BLOCK_SIZE));
 		for (block_size = 0; block_size < EXT2_BLOCK_SIZE; block_size+=d_entry->rec_len){
 			int n_offset = 4 - (d_entry->name_len % 4);
 			//check to see if there is enough space for new directory
