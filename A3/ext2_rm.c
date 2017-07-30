@@ -41,9 +41,10 @@ int main(int argc, char *argv[]) {
 	// Get the inode for the current file
 	struct ext2_inode *current_file = find_inode(argv[2], disk);
 
-	if(current_file == NULL){
+	if(current_file == NULL) {
 		printf("directory file/path doesn't exist");
 		exit(ENOENT);
+	}
 
 	current_file->i_links_count--;
 
