@@ -9,6 +9,7 @@
 #include "ext2.h"
 #include <errno.h>
 #include <string.h>
+#include <ext2_utilities.h>
 
 unsigned char *disk;
 
@@ -29,17 +30,24 @@ int main(int argc, char *argv[]) {
 	}
 
 	//Code for rm...
-	ext2_group_desc *gp_desc = (struct ext2_group_desc *)disk + (EXT2_BLOCK_SIZE * EXT2_ROOT_INO);
+	struct ext2_group_desc *gp_desc = (struct ext2_group_desc *)(disk + EXT2_BLOCK_SIZE * EXT2_ROOT_INO);
+	
+	//inode bitmap
 	unsigned int bitmap_i = gp_desc->bg_inode_bitmap;
+
+	//block bitmap
 	unsigned int bitmap_b = gp_desc->bg_block_bitmap;
 
+	// Get the inode for the current file
 	struct ext2_inode *current_file = find_inode(argv[2], disk);
 
 	if(current_file == NULL){
 		printf("directory file/path doesn't exist");
 		exit(ENOENT);
-	}
 
+	current_file->i_links_count--;
+
+	// Parent dir link
 	struct ext2_inode *parent_dir = find_inode(find_parent(argv[2]));
 
 	if(parent_dir == NULL){
@@ -47,33 +55,63 @@ int main(int argc, char *argv[]) {
 		exit(ENOENT);
 	}
 
-	//Pointers for current block
-	unsigned int *curr_block = parent_dir->i_block;
+	unsigned int *curr_block = parent_dir->i_block; //pointer to current block
 	unsigned int inode_num;
+	char file_name;
 
-	int i = 0;
+	int i, k =0;
 	for(i=0; i<12 && curr_block[i]; i++) {
+
 		struct ext2_dir_entry_2 *dir = (struct ext2_dir_entry_2 *)(disk + EXT2_BLOCK_SIZE * curr_block[i]);
 
-		int j = 0;
-		while (j < EXT2_BLOCK_SIZE) {
-			j += dir->rec_len;
+		int size = 0;
+		while (size < EXT2_BLOCK_SIZE) {
+			size = dir->rec_len + size;
+
+			// if entry is a file
 			if (dir->file_type == EXT2_FT_REG_FILE && strncmp(file_name, dir->name, dir->name_len) == 0) {
-        		struct ext2_dir_entry_2 *previous_dir = (struct ext2_dir_entry_2 *)(disk + EXT2_BLOCK_SIZE * curr_block[i]);;
+        		struct ext2_dir_entry_2 *previous_dir = (struct ext2_dir_entry_2 *)(disk + EXT2_BLOCK_SIZE * curr_block[i]);
+        		
+        		// set previous dir
+        		while((struct ext2_dir_entry_2 *)((char *)previous_dir + previous_dir->rec_len) != dir) {
+						previous_dir = (struct ext2_dir_entry_2 *)((char *)previous_dir + previous_dir->rec_len);
+				}
+
+        		previous_dir->rec_len = dir->rec_len + previous_dir->rec_len;
+        		inode_num = dir->inode;
+      		} else {
+      			return EISDIR; // entry is a dir
       		}
 		}
+		size = dir->rec_len - size;
 		dir = (struct ext2_dir_entry_2 *)((char *)dir + dir->rec_len);
 	}
 
+	unsigned int check_inode = check_inode_bitmap(disk);
+
 	curr_block = current_file->i_block;
+
+	// check if no links exists and unset bitmaps
 	if (current_file->i_links_count == 0) {
 
-		//to-do implement block unsets.
+		//unset inode bitmap
+		bitmap_clear((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_i), check_inode - 1)
+		//unset block bitmap
+		bitmap_clear((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_b), current_file->i_block[i] - 1)
 		
-		int k, blocks;
+		// Get the free blocks
+		int blocks;
         for (k = 0; k < 12 && curr_block[j]; k++) {
-        	curr_block[j] = 0;
+        	current_file->i_block[k] = 0;
         	blocks++;
         }
+
+        // Update the free block and free inode counts
+        gp_desc->bg_free_blocks_count = bg_free_blocks_count + blocks;
+        gp_desc->bg_free_inodes_count++;
+
+        current_file->i_size = 0;
+
 	}
+	return 0;
 }
