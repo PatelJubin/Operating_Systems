@@ -137,9 +137,12 @@ void set_inode_bit(unsigned char *disk){
 	unsigned int check_inode = check_inode_bitmap(disk);
 	struct ext2_group_desc *gp_desc = (struct ext2_group_desc *)(disk + (EXT2_BLOCK_SIZE*EXT2_ROOT_INO));
 	struct ext2_super_block *sp_block = (struct ext2_super_block *)(disk + EXT2_BLOCK_SIZE);
-	//decrease the available # of free inodes
-	sp_block->s_free_inode_count--;
-	//set inode bitmap
+	//decrease available # of free blocks
+	sp_block->s_free_inodes_count--;
+	//set block bit
+	char *bitmap = (char *)(disk + (gp_desc->bg_inode_bitmap * EXT2_BLOCK_SIZE));
+
+    bitmap[(check_inode - 1)/8] = bitmap[(check_inode - 1) / 8] | (1 << (check_inode - 1) % 8);
 	
 }
 
@@ -152,4 +155,31 @@ void set_block_bit(unsigned char *disk){
 	//decrease available # of free blocks
 	sp_block->s_free_blocks_count--;
 	//set block bit
+	char *bitmap = (char *)(disk + (gp_desc->bg_block_bitmap * EXT2_BLOCK_SIZE));
+
+    bitmap[(check_block - 1)/8] = bitmap[(check_block - 1) / 8] | (1 << (check_block - 1) % 8);
+}
+
+void bitmap_block_clear(unsigned int bmap_block, unsigned char *disk){
+	struct ext2_group_desc *gp_desc = (struct ext2_group_desc *)(disk + (EXT2_BLOCK_SIZE*EXT2_ROOT_INO));
+	struct ext2_super_block *sp_block = (struct ext2_super_block *)(disk + EXT2_BLOCK_SIZE);
+	
+	//decrease available # of free blocks
+	sp_block->s_free_blocks_count++;
+	//set block bit
+	char *bitmap = (char *)(disk + (gp_desc->bg_block_bitmap * EXT2_BLOCK_SIZE));
+
+    bitmap[(bmap_block - 1)/8] = bitmap[(bmap_block - 1) / 8] & ~(1 << (bmap_block - 1) % 8);
+}
+
+void bitmap_inode_clear(unsigned int bmap_inode, unsigned char *disk){
+	struct ext2_group_desc *gp_desc = (struct ext2_group_desc *)(disk + (EXT2_BLOCK_SIZE*EXT2_ROOT_INO));
+	struct ext2_super_block *sp_block = (struct ext2_super_block *)(disk + EXT2_BLOCK_SIZE);
+	
+	//decrease available # of free blocks
+	sp_block->s_free_inodes_count++;
+	//set inode bit
+	char *bitmap = (char *)(disk + (gp_desc->bg_inode_bitmap * EXT2_BLOCK_SIZE));
+
+    bitmap[(bmap_inode - 1)/8] = bitmap[(bmap_inode- 1) / 8] & ~(1 << (bmap_inode - 1) % 8);
 }
