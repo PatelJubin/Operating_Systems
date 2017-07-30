@@ -9,7 +9,7 @@
 #include "ext2.h"
 #include <errno.h>
 #include <string.h>
-#include <ext2_utilities.h>
+#include "ext2_utilities.h"
 
 unsigned char *disk;
 
