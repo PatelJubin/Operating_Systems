@@ -47,14 +47,14 @@ int main(int argc, char *argv[]) {
 	unsigned int check_blk = check_block_bitmap(disk);
 	
 	if((check_inode == -1) || (check_blk == -1)){
-		prinf("no space in bitmap");
-		exit();
+		printf("no space in bitmap");
+		exit(1);
 	}else
 	{
 		set_inode_bit(disk);
 		set_block_bit(disk);
-		struct ext2_inode *inode = inode = &(inode_table[check_inode -1]);
-		struct ext2_dir_entry_2 *dir = (struct ext2_dir_entry_2 *)(disk + (check_blk *EXT2_BLOCK_SIZE)));
+		struct ext2_inode *inode = &(inode_table[check_inode -1]);
+		struct ext2_dir_entry_2 *dir = (struct ext2_dir_entry_2 *)(disk + (check_blk *EXT2_BLOCK_SIZE));
 
 	}
 		
