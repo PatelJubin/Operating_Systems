@@ -9,7 +9,7 @@
 #include "ext2.h"
 #include <errno.h>
 #include <string.h>
-#include <ext2_utilities.h>
+#include "ext2_utilities.h"
 
 unsigned char *disk;
 
@@ -54,8 +54,21 @@ int main(int argc, char *argv[]) {
 		set_inode_bit(disk);
 		set_block_bit(disk);
 		struct ext2_inode *inode = inode = &(inode_table[check_inode -1]);
+		struct ext2_dir_entry_2 *dir = (struct ext2_dir_entry_2 *)(disk + (check_blk *EXT2_BLOCK_SIZE)));
+
 	}
-	
+		
+	inode->i_mode = EXT2_S_IFDIR;
+	inode->i_links_count = 1;
+	inode->i_size = EXT2_BLOCK_SIZE;
+	inode->i_block = 1;
+	inode->i_block[0] = check_inode;
 	//code for mkdir
 	
+	dir->file_type = EXT2_FT_DIR;
+	dir->name_len = 1;
+	strncpy(dir->name, ".", 1);
+	dir->rec_len = 12;
+	dir->inode = check_inode;
+
 }

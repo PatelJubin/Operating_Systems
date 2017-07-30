@@ -9,7 +9,7 @@
 #include "ext2.h"
 #include <errno.h>
 #include <string.h>
-#include <ext2_utilities.h>
+#include "ext2_utilities.h"
 
 
 struct ext2_inode *find_inode (char *path, unsigned char *disk){
