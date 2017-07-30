@@ -89,6 +89,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	unsigned int check_inode = check_inode_bitmap(disk);
+	unsigned int check_block = check_block_bitmap(disk);
 
 	curr_block = current_file->i_block;
 
@@ -98,7 +99,7 @@ int main(int argc, char *argv[]) {
 		//unset inode bitmap
 		bitmap_inode_clear((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_i), check_inode - 1)
 		//unset block bitmap
-		bitmap_block_clear((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_b), current_file->i_block[i] - 1)
+		bitmap_block_clear((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_b), check_block - 1)
 		
 		// Get the free blocks
 		int blocks;
