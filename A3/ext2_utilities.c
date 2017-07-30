@@ -140,9 +140,9 @@ void set_inode_bit(unsigned char *disk){
 	//decrease available # of free blocks
 	sp_block->s_free_inodes_count--;
 	//set block bit
-	char *bitmap = (char *)(disk + (gp_desc->bg_inode_bitmap * EXT2_BLOCK_SIZE));
+	char *inode_bitmap = (char *)(disk + (gp_desc->bg_inode_bitmap * EXT2_BLOCK_SIZE));
 
-    bitmap[(check_inode - 1)/8] = bitmap[(check_inode - 1) / 8] | (1 << (check_inode - 1) % 8);
+    inode_bitmap[(check_inode - 1)/8] = inode_bitmap[(check_inode - 1) / 8] | (1 << (check_inode - 1) % 8);
 	
 }
 
@@ -155,9 +155,9 @@ void set_block_bit(unsigned char *disk){
 	//decrease available # of free blocks
 	sp_block->s_free_blocks_count--;
 	//set block bit
-	char *bitmap = (char *)(disk + (gp_desc->bg_block_bitmap * EXT2_BLOCK_SIZE));
+	char *block_bitmap = (char *)(disk + (gp_desc->bg_block_bitmap * EXT2_BLOCK_SIZE));
 
-    bitmap[(check_block - 1)/8] = bitmap[(check_block - 1) / 8] | (1 << (check_block - 1) % 8);
+    block_bitmap[(check_block - 1)/8] = block_bitmap[(check_block - 1) / 8] | (1 << (check_block - 1) % 8);
 }
 
 void bitmap_block_clear(unsigned int bmap_block, unsigned char *disk){
@@ -167,9 +167,9 @@ void bitmap_block_clear(unsigned int bmap_block, unsigned char *disk){
 	//decrease available # of free blocks
 	sp_block->s_free_blocks_count++;
 	//set block bit
-	char *bitmap = (char *)(disk + (gp_desc->bg_block_bitmap * EXT2_BLOCK_SIZE));
+	char *block_bitmap = (char *)(disk + (gp_desc->bg_block_bitmap * EXT2_BLOCK_SIZE));
 
-    bitmap[(bmap_block - 1)/8] = bitmap[(bmap_block - 1) / 8] & ~(1 << (bmap_block - 1) % 8);
+    block_bitmap[(bmap_block - 1)/8] = block_bitmap[(bmap_block - 1) / 8] & ~(1 << (bmap_block - 1) % 8);
 }
 
 void bitmap_inode_clear(unsigned int bmap_inode, unsigned char *disk){
@@ -179,7 +179,7 @@ void bitmap_inode_clear(unsigned int bmap_inode, unsigned char *disk){
 	//decrease available # of free blocks
 	sp_block->s_free_inodes_count++;
 	//set inode bit
-	char *bitmap = (char *)(disk + (gp_desc->bg_inode_bitmap * EXT2_BLOCK_SIZE));
+	char *inode_bitmap = (char *)(disk + (gp_desc->bg_inode_bitmap * EXT2_BLOCK_SIZE));
 
-    bitmap[(bmap_inode - 1)/8] = bitmap[(bmap_inode- 1) / 8] & ~(1 << (bmap_inode - 1) % 8);
+    inode_bitmap[(bmap_inode - 1)/8] = inode_bitmap[(bmap_inode- 1) / 8] & ~(1 << (bmap_inode - 1) % 8);
 }
