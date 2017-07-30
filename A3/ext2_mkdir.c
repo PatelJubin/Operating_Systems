@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
 			//check to see if there is enough space for new directory
 			//add 16 at the end cause size of static fields are 8 in total so minimum rec_len for directory is
 			//8 + amount in name array, so we do this twice, thus 16
-			if(d_entry->rec_len >= (strlen(dir_name) + dir_name->name_len + n_offset + dir_offset + 16)){
+			if(d_entry->rec_len >= (strlen(dir_name) + d_entry->name_len + n_offset + dir_offset + 16)){
 				//set up the directory fields if free space found
 				unsigned int rec_len = d_entry->name_len + n_offset + 8;
 				p_dir = (struct ext2_dir_entry_2 *)((char *)(d_entry+rec_len));
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
 		
 		//update parents inode
 		p_inode->i_size += EXT2_BLOCK_SIZE;
-		p_inode->i_block += 2;	
+		p_inode->i_blocks += 2;	
 	}
 	return 0;
 }
