@@ -160,7 +160,7 @@ void set_block_bit(unsigned char *disk){
     block_bitmap[(check_block - 1)/8] = block_bitmap[(check_block - 1) / 8] | (1 << (check_block - 1) % 8);
 }
 
-void bitmap_block_clear(unsigned int bmap_block, unsigned char *disk){
+void unset_block_bit(unsigned int bmap_block, unsigned char *disk){
 	struct ext2_group_desc *gp_desc = (struct ext2_group_desc *)(disk + (EXT2_BLOCK_SIZE*EXT2_ROOT_INO));
 	struct ext2_super_block *sp_block = (struct ext2_super_block *)(disk + EXT2_BLOCK_SIZE);
 	
@@ -172,7 +172,7 @@ void bitmap_block_clear(unsigned int bmap_block, unsigned char *disk){
     block_bitmap[(bmap_block - 1)/8] = block_bitmap[(bmap_block - 1) / 8] & ~(1 << (bmap_block - 1) % 8);
 }
 
-void bitmap_inode_clear(unsigned int bmap_inode, unsigned char *disk){
+void unset_inode_bit(unsigned int bmap_inode, unsigned char *disk){
 	struct ext2_group_desc *gp_desc = (struct ext2_group_desc *)(disk + (EXT2_BLOCK_SIZE*EXT2_ROOT_INO));
 	struct ext2_super_block *sp_block = (struct ext2_super_block *)(disk + EXT2_BLOCK_SIZE);
 	
