@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 	current_file->i_links_count--;
 
 	// Parent dir link
-	struct ext2_inode *parent_dir = find_inode(find_parent(argv[2]));
+	struct ext2_inode *parent_dir = find_inode(find_parent(argv[2]), disk);
 
 	if(parent_dir == NULL){
 		printf("directory file/path doesn't exist");
