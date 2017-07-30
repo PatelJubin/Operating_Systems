@@ -96,9 +96,9 @@ int main(int argc, char *argv[]) {
 	if (current_file->i_links_count == 0) {
 
 		//unset inode bitmap
-		bitmap_clear((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_i), check_inode - 1)
+		bitmap_inode_clear((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_i), check_inode - 1)
 		//unset block bitmap
-		bitmap_clear((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_b), current_file->i_block[i] - 1)
+		bitmap_block_clear((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_b), current_file->i_block[i] - 1)
 		
 		// Get the free blocks
 		int blocks;
