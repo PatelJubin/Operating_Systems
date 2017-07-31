@@ -22,17 +22,19 @@ struct ext2_inode *find_inode (char *path, unsigned char *disk){
 	struct ext2_inode *root_inode = &inode_table[EXT2_ROOT_INO - 1];
 
 	//Initialize block and dir
-	int block = 0;
+	int block_m = 0;
 	struct ext2_dir_entry_2 *dir;
 
 	//We will split the path until we get to NULL
-	char *rest;
-	char *curr_path = strtok_r(path, "/", &rest);
+	char *p_path = malloc(sizeof(char) * (strlen(path) + 1));
+	strcpy(p_path, path);
+	char *rest = "/";
+	char *curr_path = strtok(p_path, rest);
 
 	//Loop through the blocks of the current dir
-	while (curr_path != NULL && block < 12){
+	while (curr_path != NULL && block_m < 12 && root_inode->i_block[block_m]){
 		//Changes which BLOCK is pointed to
-		unsigned char *curr_ptr = disk + (EXT2_BLOCK_SIZE * root_inode->i_block[block]);
+		unsigned char *curr_ptr = disk + (EXT2_BLOCK_SIZE * root_inode->i_block[block_m]);
 		//Max
 		unsigned char *end = curr_ptr + EXT2_BLOCK_SIZE;
 		//Get the entry
@@ -43,15 +45,15 @@ struct ext2_inode *find_inode (char *path, unsigned char *disk){
 			if (strncmp(curr_path, dir->name, dir->name_len) == 0){
 				root_inode = &inode_table[dir->inode - 1];
 				//Since we go into a new dir, we have to reset block.
-				block = 0;
-				curr_path = strtok_r(rest, "/", &rest);
+				block_m = 0;
+				curr_path = strtok(p_path, rest);
 				break;
 			}
 			//Go to the next entry in the current block
 			curr_ptr += dir->rec_len;
 			dir = (struct ext2_dir_entry_2 *)curr_ptr;
 		}
-		block++;
+		block_m++;
 	}
 
 	//If we go through all blocks at some level without finidng the inode, the path does not exist.
