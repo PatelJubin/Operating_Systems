@@ -31,12 +31,6 @@ int main(int argc, char *argv[]) {
 
 	//Code for rm...
 	struct ext2_group_desc *gp_desc = (struct ext2_group_desc *)(disk + EXT2_BLOCK_SIZE * EXT2_ROOT_INO);
-	
-	//inode bitmap
-	unsigned int bitmap_i = gp_desc->bg_inode_bitmap;
-
-	//block bitmap
-	unsigned int bitmap_b = gp_desc->bg_block_bitmap;
 
 	// Get the inode for the current file
 	struct ext2_inode *current_file = find_inode(argv[2], disk);
@@ -56,13 +50,17 @@ int main(int argc, char *argv[]) {
 		exit(ENOENT);
 	}
 
-	unsigned int *curr_block = parent_dir->i_block; //pointer to current block
+	// Pointer to current block
+	unsigned int *curr_block = parent_dir->i_block;
+
+	// Store the file name
+	char file_name[512];
+
+	// Keep track of inodes
 	unsigned int inode_num;
-	char file_name;
 
 	int i, k, j =0;
-	for(i=0; i<12 && curr_block[i]; i++) {
-
+	while(i<12 && curr_block[i]) {
 		struct ext2_dir_entry_2 *dir = (struct ext2_dir_entry_2 *)(disk + EXT2_BLOCK_SIZE * curr_block[i]);
 
 		int size = 0;
@@ -86,10 +84,8 @@ int main(int argc, char *argv[]) {
 		}
 		size = dir->rec_len - size;
 		dir = (struct ext2_dir_entry_2 *)((char *)dir + dir->rec_len);
+		i++;
 	}
-
-	unsigned int check_inode = check_inode_bitmap(disk);
-	unsigned int check_block = check_block_bitmap(disk);
 
 	curr_block = current_file->i_block;
 
@@ -97,9 +93,11 @@ int main(int argc, char *argv[]) {
 	if (current_file->i_links_count == 0) {
 
 		//unset inode bitmap
-		unset_inode_bit((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_i), check_inode - 1);
+		unset_inode_bit(inode_num, disk);
+
 		//unset block bitmap
-		unset_block_bit((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_b), check_block - 1);
+		unsigned int *singly_pt = (unsigned int *) (disk + curr_block[i] * EXT2_BLOCK_SIZE);
+		unset_block_bit(singly_pt[j], disk);
 		
 		// Get the free blocks
 		int blocks;
@@ -112,6 +110,7 @@ int main(int argc, char *argv[]) {
         gp_desc->bg_free_blocks_count += blocks;
         gp_desc->bg_free_inodes_count++;
 
+        //set i_size to 0
         current_file->i_size = 0;
 
 	}
