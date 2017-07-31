@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
 	unsigned int inode_num;
 	char file_name;
 
-	int i, k =0;
+	int i, k, j =0;
 	for(i=0; i<12 && curr_block[i]; i++) {
 
 		struct ext2_dir_entry_2 *dir = (struct ext2_dir_entry_2 *)(disk + EXT2_BLOCK_SIZE * curr_block[i]);
@@ -97,9 +97,9 @@ int main(int argc, char *argv[]) {
 	if (current_file->i_links_count == 0) {
 
 		//unset inode bitmap
-		unset_inode_bit((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_i), check_inode - 1)
+		unset_inode_bit((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_i), check_inode - 1);
 		//unset block bitmap
-		unset_block_bit((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_b), check_block - 1)
+		unset_block_bit((unsigned int *) (disk + EXT2_BLOCK_SIZE * bitmap_b), check_block - 1);
 		
 		// Get the free blocks
 		int blocks;
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Update the free block and free inode counts
-        gp_desc->bg_free_blocks_count = bg_free_blocks_count + blocks;
+        gp_desc->bg_free_blocks_count += blocks;
         gp_desc->bg_free_inodes_count++;
 
         current_file->i_size = 0;
